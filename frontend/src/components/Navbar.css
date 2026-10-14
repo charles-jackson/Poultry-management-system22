@@ -42,19 +42,34 @@
 }
 
 .nav-links-container {
-  margin-left: 1.5rem;
-  gap: 0.2rem;
+  margin-left: 1rem;
+  gap: 0.15rem;
 }
 
 .poultry-navbar .nav-link {
   color: #ffffff !important;
   font-weight: 700;
-  font-size: 1.05rem;
-  padding: 0.5rem 0.85rem !important;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.65rem !important;
   border-radius: 8px;
   position: relative;
   transition: all 0.3s ease;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+@media (min-width: 1200px) and (max-width: 1400px) {
+  .poultry-brand {
+    font-size: 1.15rem;
+  }
+  .poultry-navbar .nav-link {
+    font-size: 0.88rem;
+    padding: 0.4rem 0.5rem !important;
+  }
+  .nav-links-container {
+    margin-left: 0.5rem;
+    gap: 0.1rem;
+  }
 }
 
 /* Glowing Hover Animation */

@@ -13,8 +13,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg poultry-navbar sticky-top">
-      <div className="container-fluid px-4">
+    <nav className="navbar navbar-expand-xl poultry-navbar sticky-top">
+      <div className="container-fluid px-3 px-lg-4">
         <Link className="navbar-brand poultry-brand" to="/">
           <span className="brand-icon">🐔</span>
           <span className="brand-text">Poultry Farm Management</span>
