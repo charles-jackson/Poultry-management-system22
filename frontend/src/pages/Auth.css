@@ -1,0 +1,35 @@
+/* Auth Page CSS */
+.auth-container {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  min-height: 85vh;
+}
+
+.auth-card {
+  max-width: 480px;
+  width: 100%;
+  background: #ffffff;
+  border-top: 5px solid #2e7d32 !important;
+}
+
+.auth-brand-logo {
+  font-size: 3.5rem;
+  animation: bounceChicken 2s infinite ease-in-out;
+}
+
+@keyframes bounceChicken {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.auth-submit-btn {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b4327 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+  transition: all 0.3s ease;
+}
+
+.auth-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.45);
+}

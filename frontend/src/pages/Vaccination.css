@@ -1,0 +1,13 @@
+/* Vaccination Page CSS */
+.vaccination-container {
+  background-color: #f4f7f4;
+  min-height: 85vh;
+}
+
+.vaccination-table tbody tr {
+  transition: background-color 0.25s ease;
+}
+
+.vaccination-table tbody tr:hover {
+  background-color: rgba(46, 125, 50, 0.08);
+}

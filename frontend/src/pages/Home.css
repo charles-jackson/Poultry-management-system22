@@ -1,0 +1,96 @@
+/* Home Page Styling */
+.home-container {
+  background-color: #f4f7f4;
+  min-height: 85vh;
+}
+
+.hero-banner {
+  background: linear-gradient(135deg, #1b4327 0%, #2e7d32 100%);
+  border-radius: 0 0 25px 25px;
+  box-shadow: 0 10px 30px rgba(27, 67, 39, 0.25);
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  letter-spacing: -0.5px;
+}
+
+.hero-btn {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.hero-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Overview Cards */
+.overview-card {
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: #ffffff;
+}
+
+.overview-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12) !important;
+}
+
+.card-value {
+  color: #1b4327;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.icon-wrapper {
+  font-size: 2.2rem;
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(46, 125, 50, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.overview-card:hover .icon-wrapper {
+  transform: scale(1.15) rotate(5deg);
+}
+
+/* Module Cards */
+.module-card {
+  border: 1px solid rgba(46, 125, 50, 0.15);
+  border-radius: 18px;
+  background: #ffffff;
+  transition: all 0.35s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(27, 67, 39, 0.15) !important;
+  border-color: #2e7d32;
+}
+
+.module-icon {
+  font-size: 3rem;
+  transition: transform 0.3s ease;
+}
+
+.module-card:hover .module-icon {
+  transform: scale(1.2);
+}
+
+/* Recent Activities Table */
+.activity-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.activity-table tbody tr:hover {
+  background-color: rgba(46, 125, 50, 0.05);
+}
+
+.fs-7 {
+  font-size: 0.85rem;
+}

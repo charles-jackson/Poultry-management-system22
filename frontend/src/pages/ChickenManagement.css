@@ -1,0 +1,41 @@
+/* Chicken Management Page CSS */
+.chicken-mgmt-container {
+  background-color: #f4f7f4;
+  min-height: 85vh;
+}
+
+.btn-success-glow {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b4327 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-success-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.45);
+  color: #fff;
+}
+
+.chicken-table tbody tr {
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.chicken-table tbody tr:hover {
+  background-color: rgba(46, 125, 50, 0.08);
+}
+
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.search-card {
+  background: #ffffff;
+}

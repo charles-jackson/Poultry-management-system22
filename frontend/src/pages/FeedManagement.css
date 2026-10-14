@@ -1,0 +1,13 @@
+/* Feed Management Page CSS */
+.feed-mgmt-container {
+  background-color: #f4f7f4;
+  min-height: 85vh;
+}
+
+.feed-table tbody tr {
+  transition: background-color 0.25s ease;
+}
+
+.feed-table tbody tr:hover {
+  background-color: rgba(46, 125, 50, 0.08);
+}

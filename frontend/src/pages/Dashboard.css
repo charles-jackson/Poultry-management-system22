@@ -1,0 +1,50 @@
+/* Dashboard Page Styling */
+.dashboard-container {
+  background-color: #f4f7f4;
+  min-height: 85vh;
+}
+
+.dashboard-title {
+  font-size: 2.2rem;
+  letter-spacing: -0.5px;
+}
+
+.stat-card {
+  border-radius: 16px;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.8px;
+}
+
+.stat-icon {
+  font-size: 2rem;
+}
+
+.stat-number {
+  font-size: 2.1rem;
+}
+
+.bg-profit-positive {
+  background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+  border-left: 5px solid #2e7d32 !important;
+}
+
+.bg-profit-negative {
+  background: linear-gradient(135deg, #ffebee 0%, #ffffff 100%);
+  border-left: 5px solid #d32f2f !important;
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 18px;
+}
