@@ -26,6 +26,16 @@ const vaccinationSchema = new mongoose.Schema(
       required: [true, 'Please specify dose / quantity'],
       min: 1,
     },
+    cost: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    expenseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Expense',
+      default: null,
+    },
     remarks: {
       type: String,
       default: '',

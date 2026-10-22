@@ -16,6 +16,7 @@ const Vaccination = () => {
     vaccinationDate: new Date().toISOString().split('T')[0],
     nextVaccinationDate: '',
     quantity: '',
+    cost: '',
     remarks: '',
   });
 
@@ -51,6 +52,7 @@ const Vaccination = () => {
       vaccinationDate: new Date().toISOString().split('T')[0],
       nextVaccinationDate: '',
       quantity: '',
+      cost: '',
       remarks: '',
     });
     setShowModal(true);
@@ -63,8 +65,11 @@ const Vaccination = () => {
       breed: v.breed,
       vaccineName: v.vaccineName,
       vaccinationDate: new Date(v.vaccinationDate).toISOString().split('T')[0],
-      nextVaccinationDate: v.nextVaccinationDate ? new Date(v.nextVaccinationDate).toISOString().split('T')[0] : '',
+      nextVaccinationDate: v.nextVaccinationDate
+        ? new Date(v.nextVaccinationDate).toISOString().split('T')[0]
+        : '',
       quantity: v.quantity,
+      cost: v.cost || '',
       remarks: v.remarks || '',
     });
     setShowModal(true);
@@ -73,10 +78,15 @@ const Vaccination = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        cost: Number(formData.cost || 0),
+      };
+
       if (isEditing) {
-        await API.put(`/vaccinations/${currentId}`, formData);
+        await API.put(`/vaccinations/${currentId}`, payload);
       } else {
-        await API.post('/vaccinations', formData);
+        await API.post('/vaccinations', payload);
       }
       setShowModal(false);
       fetchVaccinations();
@@ -86,7 +96,7 @@ const Vaccination = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this vaccination record?')) {
+    if (window.confirm('Are you sure you want to delete this vaccination record? Any linked expense entry will also be deleted.')) {
       try {
         await API.delete(`/vaccinations/${id}`);
         fetchVaccinations();
@@ -99,8 +109,12 @@ const Vaccination = () => {
   const filteredVaccinations = vaccinations.filter(
     (v) =>
       v.breed.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.vaccineName.toLowerCase().includes(searchTerm.toLowerCase())
+      v.vaccineName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (v.remarks && v.remarks.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const totalVaccinationCost = vaccinations.reduce((acc, v) => acc + (Number(v.cost) || 0), 0);
+  const totalDosesGiven = vaccinations.reduce((acc, v) => acc + (Number(v.quantity) || 0), 0);
 
   return (
     <div className="vaccination-container py-4">
@@ -109,11 +123,48 @@ const Vaccination = () => {
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="fw-bold text-success mb-1">💉 Vaccination Schedule & Records</h1>
-            <p className="text-muted mb-0">Track flock immunization, vaccine doses, booster dates, and health observations</p>
+            <p className="text-muted mb-0">Track flock immunization, vaccine doses, booster dates, and automatic expense synchronization</p>
           </div>
           <button className="btn btn-success-glow fw-bold px-4 py-2" onClick={openAddModal}>
             ➕ Log Vaccination
           </button>
+        </div>
+
+        {/* Quick Stat Cards */}
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-4">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">Total Recorded Doses</div>
+                  <h3 className="fw-extrabold text-success mb-0">{totalDosesGiven.toLocaleString()}</h3>
+                </div>
+                <div className="fs-1">💉</div>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 col-md-4">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">Vaccination Expenses</div>
+                  <h3 className="fw-extrabold text-danger mb-0">${totalVaccinationCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                </div>
+                <div className="fs-1">💸</div>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 col-md-4">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">Active Protocols</div>
+                  <h3 className="fw-extrabold text-primary mb-0">{vaccinations.length}</h3>
+                </div>
+                <div className="fs-1">📋</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Filter Bar */}
@@ -123,7 +174,7 @@ const Vaccination = () => {
               <input
                 type="text"
                 className="form-control rounded-3 border-success-subtle"
-                placeholder="🔍 Search chicken breed or vaccine name..."
+                placeholder="🔍 Search chicken breed, vaccine name, or notes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -156,6 +207,7 @@ const Vaccination = () => {
                       <th>Chicken / Breed</th>
                       <th>Vaccine Name</th>
                       <th>Dose Quantity</th>
+                      <th>Cost & Expense</th>
                       <th>Vaccination Date</th>
                       <th>Next Booster Date</th>
                       <th>Remarks</th>
@@ -173,6 +225,20 @@ const Vaccination = () => {
                           </span>
                         </td>
                         <td className="fw-bold">{v.quantity} doses</td>
+                        <td>
+                          {Number(v.cost) > 0 ? (
+                            <>
+                              <div className="fw-bold text-danger">
+                                ${Number(v.cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </div>
+                              <small className="text-danger fw-semibold" title="Synced to Expense Management">
+                                💸 Synced Expense
+                              </small>
+                            </>
+                          ) : (
+                            <span className="text-muted">—</span>
+                          )}
+                        </td>
                         <td className="text-muted">
                           {new Date(v.vaccinationDate).toLocaleDateString()}
                         </td>
@@ -211,7 +277,7 @@ const Vaccination = () => {
       {/* Modal */}
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content rounded-4 border-0 shadow">
               <div className="modal-header bg-success text-white">
                 <h5 className="modal-title fw-bold">
@@ -225,6 +291,14 @@ const Vaccination = () => {
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
+                  {/* Expense Sync Note */}
+                  <div className="alert alert-warning border-warning d-flex align-items-center gap-2 mb-3 py-2">
+                    <span className="fs-4">💡</span>
+                    <div style={{ fontSize: '0.88rem' }}>
+                      <strong>Expense Integration Active:</strong> Any vaccination/medicine cost entered here will automatically be recorded under <strong>Expense Management</strong> as <em>"Vaccination & Medicine"</em>.
+                    </div>
+                  </div>
+
                   <div className="mb-3">
                     <label className="form-label fw-bold">Chicken / Breed</label>
                     <input
@@ -232,26 +306,26 @@ const Vaccination = () => {
                       className="form-control"
                       name="breed"
                       required
-                      placeholder="e.g. Rhode Island Red - Batch A"
+                      placeholder="e.g. Rhode Island Red - Batch A, Broilers"
                       value={formData.breed}
                       onChange={handleInputChange}
                     />
                   </div>
 
                   <div className="row g-3 mb-3">
-                    <div className="col-6">
+                    <div className="col-12 col-md-6">
                       <label className="form-label fw-bold">Vaccine Name</label>
                       <input
                         type="text"
                         className="form-control"
                         name="vaccineName"
                         required
-                        placeholder="e.g. Newcastle (LaSota), Gumboro"
+                        placeholder="e.g. Newcastle (LaSota), Gumboro, Marek's"
                         value={formData.vaccineName}
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div className="col-6">
+                    <div className="col-12 col-md-3">
                       <label className="form-label fw-bold">Dose Quantity</label>
                       <input
                         type="number"
@@ -264,10 +338,24 @@ const Vaccination = () => {
                         onChange={handleInputChange}
                       />
                     </div>
+                    <div className="col-12 col-md-3">
+                      <label className="form-label fw-bold">Vaccine Cost ($)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="cost"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formData.cost}
+                        onChange={handleInputChange}
+                      />
+                      <small className="text-muted" style={{ fontSize: '0.72rem' }}>Leave 0 if no cost</small>
+                    </div>
                   </div>
 
                   <div className="row g-3 mb-3">
-                    <div className="col-6">
+                    <div className="col-12 col-md-6">
                       <label className="form-label fw-bold">Vaccination Date</label>
                       <input
                         type="date"
@@ -278,7 +366,7 @@ const Vaccination = () => {
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div className="col-6">
+                    <div className="col-12 col-md-6">
                       <label className="form-label fw-bold">Next Booster Date</label>
                       <input
                         type="date"
@@ -297,7 +385,7 @@ const Vaccination = () => {
                       className="form-control"
                       name="remarks"
                       rows="3"
-                      placeholder="e.g. Administered via drinking water. All birds healthy."
+                      placeholder="e.g. Administered via drinking water, supplier details, batch observations..."
                       value={formData.remarks}
                       onChange={handleInputChange}
                     ></textarea>
@@ -313,7 +401,7 @@ const Vaccination = () => {
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-success fw-bold px-4">
-                    {isEditing ? 'Save Changes' : 'Save Record'}
+                    {isEditing ? 'Save Changes' : 'Save & Record Expense'}
                   </button>
                 </div>
               </form>
