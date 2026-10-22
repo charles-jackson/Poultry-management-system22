@@ -38,7 +38,6 @@ const chickenSchema = new mongoose.Schema(
     },
     purchaseDate: {
       type: Date,
-      required: [true, 'Please specify the date'],
       default: Date.now,
     },
     price: {

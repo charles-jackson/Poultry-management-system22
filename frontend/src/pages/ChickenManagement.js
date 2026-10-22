@@ -20,7 +20,7 @@ const ChickenManagement = () => {
     source: 'Available in Farm', // 'Available in Farm' or 'Brought from Outside'
     supplier: '',
     purchaseDate: new Date().toISOString().split('T')[0],
-    price: '',
+    price: 0,
   });
 
   const [showModal, setShowModal] = useState(false);
@@ -59,7 +59,7 @@ const ChickenManagement = () => {
       source: 'Available in Farm',
       supplier: '',
       purchaseDate: new Date().toISOString().split('T')[0],
-      price: '',
+      price: 0,
     });
     setShowModal(true);
   };
@@ -75,8 +75,10 @@ const ChickenManagement = () => {
       healthStatus: chicken.healthStatus,
       source: chicken.source || 'Available in Farm',
       supplier: chicken.supplier || '',
-      purchaseDate: new Date(chicken.purchaseDate).toISOString().split('T')[0],
-      price: chicken.price,
+      purchaseDate: chicken.purchaseDate
+        ? new Date(chicken.purchaseDate).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      price: chicken.price || 0,
     });
     setShowModal(true);
   };
@@ -84,10 +86,17 @@ const ChickenManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        price: formData.source === 'Brought from Outside' ? Number(formData.price || 0) : 0,
+        supplier: formData.source === 'Brought from Outside' ? formData.supplier : '',
+        purchaseDate: formData.source === 'Brought from Outside' ? formData.purchaseDate : new Date(),
+      };
+
       if (isEditing) {
-        await API.put(`/chickens/${currentId}`, formData);
+        await API.put(`/chickens/${currentId}`, payload);
       } else {
-        await API.post('/chickens', formData);
+        await API.post('/chickens', payload);
       }
       setShowModal(false);
       fetchChickens();
@@ -219,8 +228,8 @@ const ChickenManagement = () => {
                       <th>Age</th>
                       <th>Gender</th>
                       <th>Health Status</th>
-                      <th>Date</th>
-                      <th>Price / Total</th>
+                      <th>Purchase Date</th>
+                      <th>Unit Price / Expense</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -247,7 +256,7 @@ const ChickenManagement = () => {
                               </div>
                             ) : (
                               <span className="badge bg-success-subtle text-success px-2 py-1">
-                                🏡 Farm Raised
+                                🏡 Available in Farm
                               </span>
                             )}
                           </td>
@@ -273,13 +282,27 @@ const ChickenManagement = () => {
                               {chicken.healthStatus}
                             </span>
                           </td>
-                          <td>{new Date(chicken.purchaseDate).toLocaleDateString()}</td>
                           <td>
-                            <div className="fw-bold text-dark">${chicken.price}/unit</div>
-                            {isOutside && totalCost > 0 && (
-                              <small className="text-danger fw-semibold" title="Synced to Expense Management">
-                                💸 Expense: ${totalCost.toLocaleString()}
-                              </small>
+                            {isOutside && chicken.purchaseDate ? (
+                              new Date(chicken.purchaseDate).toLocaleDateString()
+                            ) : (
+                              <span className="text-muted">—</span>
+                            )}
+                          </td>
+                          <td>
+                            {isOutside ? (
+                              <>
+                                <div className="fw-bold text-dark">${chicken.price}/unit</div>
+                                {totalCost > 0 && (
+                                  <small className="text-danger fw-semibold" title="Synced to Expense Management">
+                                    💸 Expense: ${totalCost.toLocaleString()}
+                                  </small>
+                                )}
+                              </>
+                            ) : (
+                              <span className="badge bg-light text-muted border px-2 py-1">
+                                Farm Stock
+                              </span>
                             )}
                           </td>
                           <td>
@@ -338,11 +361,11 @@ const ChickenManagement = () => {
                               : 'border-secondary-subtle bg-light'
                           }`}
                           style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
-                          onClick={() => setFormData((prev) => ({ ...prev, source: 'Available in Farm' }))}
+                          onClick={() => setFormData((prev) => ({ ...prev, source: 'Available in Farm', price: 0 }))}
                         >
                           <div className="fs-3 mb-1">🏡</div>
                           <div className="fw-bold text-dark">Available in Farm</div>
-                          <small className="text-muted">Raised on farm / existing flock (No expense added)</small>
+                          <small className="text-muted">Raised on farm / existing flock (No date & price needed)</small>
                         </div>
                       </div>
                       <div className="col-12 col-md-6">
@@ -357,18 +380,18 @@ const ChickenManagement = () => {
                         >
                           <div className="fs-3 mb-1">🚚</div>
                           <div className="fw-bold text-dark">Brought from Outside</div>
-                          <small className="text-muted">Purchased flock (Auto-adds to Expense Management)</small>
+                          <small className="text-muted">Purchased flock (Requires date, price & logs expense)</small>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Informational banner when Brought from Outside */}
-                  {formData.source === 'Brought from Outside' && (
+                  {/* Informational banner based on Source */}
+                  {formData.source === 'Brought from Outside' ? (
                     <div className="alert alert-warning border-warning d-flex align-items-center gap-2 mb-4 py-2">
                       <span className="fs-4">💡</span>
                       <div style={{ fontSize: '0.88rem' }}>
-                        <strong>Expense Integration Active:</strong> When saved, a total purchase cost of{' '}
+                        <strong>Expense Integration Active:</strong> When saved, purchase total of{' '}
                         <strong>
                           $
                           {(
@@ -377,6 +400,13 @@ const ChickenManagement = () => {
                         </strong>{' '}
                         will automatically be created under <strong>Expense Management</strong> as{' '}
                         <em>"Chicken Purchase"</em>.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="alert alert-success-subtle border-success-subtle d-flex align-items-center gap-2 mb-4 py-2">
+                      <span className="fs-4">🏡</span>
+                      <div style={{ fontSize: '0.88rem' }}>
+                        <strong>Farm Raised Flock:</strong> This flock is already available on your farm. No purchase date or estimated price is required.
                       </div>
                     </div>
                   )}
@@ -408,20 +438,6 @@ const ChickenManagement = () => {
                       />
                     </div>
                   </div>
-
-                  {formData.source === 'Brought from Outside' && (
-                    <div className="mb-3">
-                      <label className="form-label fw-bold">Supplier / Vendor / Origin (Optional)</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="supplier"
-                        placeholder="e.g. Sunrise Hatchery, Local Poultry Market"
-                        value={formData.supplier}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  )}
 
                   <div className="row g-3 mb-3">
                     <div className="col-12 col-md-4">
@@ -467,39 +483,50 @@ const ChickenManagement = () => {
                     </div>
                   </div>
 
-                  <div className="row g-3 mb-3">
-                    <div className="col-12 col-md-6">
-                      <label className="form-label fw-bold">
-                        {formData.source === 'Brought from Outside' ? 'Purchase Date' : 'Record Date'}
-                      </label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        name="purchaseDate"
-                        required
-                        value={formData.purchaseDate}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="col-12 col-md-6">
-                      <label className="form-label fw-bold">
-                        {formData.source === 'Brought from Outside'
-                          ? 'Purchase Price per Unit ($)'
-                          : 'Estimated Unit Value ($)'}
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        name="price"
-                        required
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={formData.price}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
+                  {/* ONLY show Supplier, Purchase Date, and Price when Brought from Outside */}
+                  {formData.source === 'Brought from Outside' && (
+                    <>
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">Supplier / Vendor / Origin (Optional)</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="supplier"
+                          placeholder="e.g. Sunrise Hatchery, Local Poultry Market"
+                          value={formData.supplier}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+
+                      <div className="row g-3 mb-3">
+                        <div className="col-12 col-md-6">
+                          <label className="form-label fw-bold">Purchase Date</label>
+                          <input
+                            type="date"
+                            className="form-control"
+                            name="purchaseDate"
+                            required
+                            value={formData.purchaseDate}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label fw-bold">Purchase Price per Unit ($)</label>
+                          <input
+                            type="number"
+                            className="form-control"
+                            name="price"
+                            required
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={formData.price}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="modal-footer bg-light rounded-bottom-4">
