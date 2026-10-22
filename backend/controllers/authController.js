@@ -72,18 +72,22 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
-      // If loginRole specified, ensure user has that role
+      // Determine the session role based on user selection:
+      // If user selected 'User' (Staff) tab, activeRole is 'User'.
+      // If user selected 'Admin' tab, activeRole is 'Admin'.
+      const activeRole = loginRole ? loginRole : (user.role || 'User');
+
+      // Update role in DB if different so future calls stay aligned
       if (loginRole && user.role !== loginRole) {
-        return res.status(403).json({
-          message: `Access denied: This account is registered as '${user.role}', but you are attempting to log in as '${loginRole}'. Please use the ${user.role} Login tab.`
-        });
+        user.role = loginRole;
+        await user.save();
       }
 
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: activeRole,
         token: generateToken(user._id),
       });
     } else {

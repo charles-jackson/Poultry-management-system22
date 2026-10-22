@@ -4,12 +4,18 @@ import { AuthContext } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, switchRole } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleToggleRole = () => {
+    const nextRole = user.role === 'Admin' ? 'User' : 'Admin';
+    switchRole(nextRole);
+    navigate('/');
   };
 
   return (
@@ -94,12 +100,20 @@ const Navbar = () => {
             )}
           </ul>
 
-          <div className="d-flex align-items-center gap-3 auth-section">
+          <div className="d-flex align-items-center gap-2 auth-section flex-wrap">
             {user ? (
               <>
                 <span className="user-badge">
                   {user.role === 'Admin' ? '👑 Admin' : '👨‍🌾 Staff'}: {user.name}
                 </span>
+                <button
+                  className="btn btn-outline-light btn-sm fw-bold px-2 py-1 rounded-pill"
+                  style={{ fontSize: '0.78rem', borderColor: 'rgba(255,255,255,0.45)' }}
+                  onClick={handleToggleRole}
+                  title="Switch between Admin and Staff role view"
+                >
+                  {user.role === 'Admin' ? '🔄 Switch to Staff' : '🔄 Switch to Admin'}
+                </button>
                 <button className="btn btn-logout-glow btn-sm fw-bold px-3" onClick={handleLogout}>
                   Logout
                 </button>
