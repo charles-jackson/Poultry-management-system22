@@ -29,6 +29,8 @@ const Dashboard = () => {
     totalChickens: 0,
     totalEggs: 0,
     goodEggsCount: 0,
+    totalEggsSold: 0,
+    eggBalance: 0,
     feedStock: 0,
     totalEmployees: 0,
     totalSales: 0,
@@ -91,16 +93,20 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Total Eggs */}
+              {/* Available Egg Balance */}
               <div className="col-12 col-sm-6 col-lg-3">
                 <div className="card stat-card stat-eggs shadow-sm border-0 h-100">
                   <div className="card-body">
                     <div className="d-flex align-items-center justify-content-between mb-2">
-                      <span className="stat-label text-muted fw-bold">TOTAL EGGS</span>
+                      <span className="stat-label text-muted fw-bold">EGG BALANCE</span>
                       <span className="stat-icon">🥚</span>
                     </div>
-                    <h2 className="stat-number fw-bold text-dark">{summary.totalEggs.toLocaleString()}</h2>
-                    <small className="text-warning fw-semibold">{summary.goodEggsCount} good eggs</small>
+                    <h2 className="stat-number fw-bold text-success">
+                      {(summary.eggBalance !== undefined ? summary.eggBalance : Math.max(0, summary.goodEggsCount - (summary.totalEggsSold || 0))).toLocaleString()}
+                    </h2>
+                    <small className="text-muted fw-semibold">
+                      {summary.totalEggsSold || 0} sold • {summary.totalEggs} harvested
+                    </small>
                   </div>
                 </div>
               </div>

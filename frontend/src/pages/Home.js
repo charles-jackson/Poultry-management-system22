@@ -29,6 +29,8 @@ const Home = () => {
   const summary = dashboardData?.summary || {
     totalChickens: 0,
     totalEggs: 0,
+    eggBalance: 0,
+    totalEggsSold: 0,
     feedStock: 0,
     totalEmployees: 0,
     totalSales: 0,
@@ -104,14 +106,16 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Eggs Produced */}
+            {/* Egg Balance */}
             <div className="col-12 col-sm-6 col-lg-4">
               <div className="card overview-card card-eggs h-100 shadow-sm border-0">
                 <div className="card-body d-flex align-items-center justify-content-between p-4">
                   <div>
-                    <span className="card-subtitle text-muted fw-semibold display-block">Egg Yield</span>
-                    <h3 className="card-value fw-extrabold mt-1 mb-0">{summary.totalEggs.toLocaleString()}</h3>
-                    <small className="text-warning fw-semibold">🥚 Eggs Produced</small>
+                    <span className="card-subtitle text-muted fw-semibold display-block">Egg Balance</span>
+                    <h3 className="card-value fw-extrabold mt-1 mb-0 text-success">
+                      {(summary.eggBalance !== undefined ? summary.eggBalance : Math.max(0, (summary.goodEggsCount || summary.totalEggs) - (summary.totalEggsSold || 0))).toLocaleString()}
+                    </h3>
+                    <small className="text-muted fw-semibold">🥚 Available in farm ({summary.totalEggs} produced)</small>
                   </div>
                   <div className="icon-wrapper icon-eggs">🥚</div>
                 </div>

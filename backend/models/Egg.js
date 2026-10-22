@@ -32,6 +32,16 @@ const eggSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    soldEggs: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    balanceEggs: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     pricePerEgg: {
       type: Number,
       required: [true, 'Please specify price per egg'],
@@ -52,6 +62,10 @@ eggSchema.pre('save', function (next) {
     return next(new Error('Broken eggs cannot be greater than total eggs'));
   }
   this.goodEggs = this.totalEggs - this.brokenEggs;
+  if (this.soldEggs === undefined || this.soldEggs === null) {
+    this.soldEggs = 0;
+  }
+  this.balanceEggs = Math.max(0, this.goodEggs - this.soldEggs);
   this.totalAmount = this.goodEggs * this.pricePerEgg;
   next();
 });

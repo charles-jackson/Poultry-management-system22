@@ -17,12 +17,22 @@ const getDashboardData = async (req, res) => {
     ]);
     const totalChickens = chickenAgg.length > 0 ? chickenAgg[0].total : 0;
 
-    // 2. Total Eggs Produced
+    // 2. Total Eggs Produced & Available Balance
     const eggAgg = await Egg.aggregate([
-      { $group: { _id: null, total: { $sum: '$goodEggs' }, totalAll: { $sum: '$totalEggs' } } }
+      {
+        $group: {
+          _id: null,
+          totalAll: { $sum: '$totalEggs' },
+          goodTotal: { $sum: '$goodEggs' },
+          soldTotal: { $sum: { $ifNull: ['$soldEggs', 0] } },
+          balanceTotal: { $sum: { $ifNull: ['$balanceEggs', '$goodEggs'] } },
+        },
+      },
     ]);
     const totalEggs = eggAgg.length > 0 ? eggAgg[0].totalAll : 0;
-    const goodEggsCount = eggAgg.length > 0 ? eggAgg[0].total : 0;
+    const goodEggsCount = eggAgg.length > 0 ? eggAgg[0].goodTotal : 0;
+    const totalEggsSold = eggAgg.length > 0 ? eggAgg[0].soldTotal : 0;
+    const eggBalance = eggAgg.length > 0 ? (eggAgg[0].balanceTotal !== undefined ? eggAgg[0].balanceTotal : Math.max(0, goodEggsCount - totalEggsSold)) : 0;
 
     // 3. Feed Stock Total (in Kg/Bags)
     const feedAgg = await Feed.aggregate([
@@ -125,6 +135,8 @@ const getDashboardData = async (req, res) => {
         totalChickens,
         totalEggs,
         goodEggsCount,
+        totalEggsSold,
+        eggBalance,
         feedStock,
         totalEmployees,
         totalSales,

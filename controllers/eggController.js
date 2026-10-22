@@ -4,7 +4,16 @@ const Egg = require('../models/Egg');
 const getEggs = async (req, res) => {
   try {
     const eggs = await Egg.find().sort({ productionDate: -1 });
-    res.json(eggs);
+    const formatted = eggs.map((e) => {
+      const obj = e.toObject();
+      const sold = obj.soldEggs || 0;
+      const good = obj.goodEggs !== undefined ? obj.goodEggs : Math.max(0, (obj.totalEggs || 0) - (obj.brokenEggs || 0));
+      obj.soldEggs = sold;
+      obj.goodEggs = good;
+      obj.balanceEggs = obj.balanceEggs !== undefined ? obj.balanceEggs : Math.max(0, good - sold);
+      return obj;
+    });
+    res.json(formatted);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -45,6 +54,14 @@ const updateEgg = async (req, res) => {
         return res.status(400).json({ message: 'Broken eggs cannot be greater than total eggs' });
       }
 
+      const calculatedGood = newTotal - newBroken;
+      const currentSold = egg.soldEggs || 0;
+      if (calculatedGood < currentSold) {
+        return res.status(400).json({
+          message: `Cannot reduce good eggs below already sold eggs (${currentSold} eggs already sold from this batch).`,
+        });
+      }
+
       egg.breed = req.body.breed || egg.breed;
       egg.productionDate = req.body.productionDate || egg.productionDate;
       egg.totalEggs = newTotal;
@@ -66,6 +83,11 @@ const deleteEgg = async (req, res) => {
   try {
     const egg = await Egg.findById(req.params.id);
     if (egg) {
+      if ((egg.soldEggs || 0) > 0) {
+        return res.status(400).json({
+          message: `Cannot delete egg harvest record because ${egg.soldEggs} eggs have already been sold from this batch. Please adjust or delete the associated sales first.`,
+        });
+      }
       await egg.deleteOne();
       res.json({ message: 'Egg record deleted successfully' });
     } else {

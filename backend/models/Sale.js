@@ -17,12 +17,21 @@ const saleSchema = new mongoose.Schema(
       ref: 'Chicken',
       default: null,
     },
+    eggId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Egg',
+      default: null,
+    },
     quantity: {
       type: Number,
       required: [true, 'Please specify quantity'],
       min: 1,
     },
     deductedQuantity: {
+      type: Number,
+      default: 0,
+    },
+    remainingStockBalance: {
       type: Number,
       default: 0,
     },
@@ -45,6 +54,14 @@ const saleSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    amountPaid: {
+      type: Number,
+      default: 0,
+    },
+    paymentBalance: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
@@ -53,6 +70,10 @@ const saleSchema = new mongoose.Schema(
 
 saleSchema.pre('save', function (next) {
   this.totalAmount = this.quantity * this.price;
+  if (this.amountPaid === undefined || this.amountPaid === null || this.amountPaid === 0) {
+    this.amountPaid = this.totalAmount;
+  }
+  this.paymentBalance = Math.max(0, this.totalAmount - this.amountPaid);
   next();
 });
 
