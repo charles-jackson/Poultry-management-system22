@@ -13,7 +13,7 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Please provide all required fields' });
@@ -31,10 +31,13 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    const assignedRole = role === 'Admin' ? 'Admin' : 'User';
+
     const user = await User.create({
       name,
       email,
       password,
+      role: assignedRole,
     });
 
     if (user) {
@@ -58,7 +61,7 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, loginRole } = req.body;
 
     if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({
@@ -69,6 +72,13 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      // If loginRole specified, ensure user has that role
+      if (loginRole && user.role !== loginRole) {
+        return res.status(403).json({
+          message: `Access denied: This account is registered as '${user.role}', but you are attempting to log in as '${loginRole}'. Please use the ${user.role} Login tab.`
+        });
+      }
+
       res.json({
         _id: user._id,
         name: user.name,

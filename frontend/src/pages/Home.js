@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 import './Home.css';
 
 const Home = () => {
+  const { user } = useContext(AuthContext);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const isAdmin = user?.role === 'Admin';
 
   useEffect(() => {
     fetchData();
@@ -38,19 +42,39 @@ const Home = () => {
       {/* Hero Banner Section */}
       <section className="hero-banner text-white text-center py-5 mb-4">
         <div className="container">
+          <div className="mb-2">
+            <span className="badge bg-light text-dark fw-bold px-3 py-2 rounded-pill fs-7">
+              {isAdmin ? '👑 Administrator Portal' : '👨‍🌾 Staff Operations Portal'}
+            </span>
+          </div>
           <h1 className="hero-title fw-bold mb-3">
             🐔 Welcome to Smart Poultry Farm Management
           </h1>
           <p className="hero-subtitle lead mb-4 mx-auto" style={{ maxWidth: '750px' }}>
-            Monitor flock health, feed inventory, egg production, vaccinations, staff attendance, sales & expenses with ease and precision.
+            {isAdmin
+              ? 'Oversee farm business metrics, comprehensive financial analytics, and employee management.'
+              : 'Record flock health, monitor feed inventory, manage vaccinations, log egg yields, and track sales.'}
           </p>
-          <div className="d-flex justify-content-center gap-3">
-            <Link to="/dashboard" className="btn btn-warning btn-lg fw-bold px-4 hero-btn">
-              📊 View Analytics Dashboard
-            </Link>
-            <Link to="/chickens" className="btn btn-outline-light btn-lg fw-bold px-4 hero-btn">
-              🐔 Manage Chickens
-            </Link>
+          <div className="d-flex justify-content-center gap-3 flex-wrap">
+            {isAdmin ? (
+              <>
+                <Link to="/dashboard" className="btn btn-warning btn-lg fw-bold px-4 hero-btn">
+                  📊 View Analytics Dashboard
+                </Link>
+                <Link to="/employees" className="btn btn-outline-light btn-lg fw-bold px-4 hero-btn">
+                  👨‍🌾 Manage Employees
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/chickens" className="btn btn-warning btn-lg fw-bold px-4 hero-btn">
+                  🐔 Manage Chickens
+                </Link>
+                <Link to="/feed" className="btn btn-outline-light btn-lg fw-bold px-4 hero-btn">
+                  🌾 Manage Feed
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -62,7 +86,7 @@ const Home = () => {
             <h2 className="section-title text-success fw-bold">
               <span className="me-2">📊</span> Farm Overview
             </h2>
-            <p className="text-muted">Real-time inventory and financial metrics</p>
+            <p className="text-muted">Real-time inventory and operations summary</p>
           </div>
 
           <div className="row g-4">
@@ -108,19 +132,21 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Employees */}
-            <div className="col-12 col-sm-6 col-lg-4">
-              <div className="card overview-card card-employees h-100 shadow-sm border-0">
-                <div className="card-body d-flex align-items-center justify-content-between p-4">
-                  <div>
-                    <span className="card-subtitle text-muted fw-semibold display-block">Active Staff</span>
-                    <h3 className="card-value fw-extrabold mt-1 mb-0">{summary.totalEmployees}</h3>
-                    <small className="text-info fw-semibold">👨‍🌾 Employees</small>
+            {/* Employees: Only visible to Admin */}
+            {isAdmin && (
+              <div className="col-12 col-sm-6 col-lg-4">
+                <div className="card overview-card card-employees h-100 shadow-sm border-0">
+                  <div className="card-body d-flex align-items-center justify-content-between p-4">
+                    <div>
+                      <span className="card-subtitle text-muted fw-semibold display-block">Active Staff</span>
+                      <h3 className="card-value fw-extrabold mt-1 mb-0">{summary.totalEmployees}</h3>
+                      <small className="text-info fw-semibold">👨‍🌾 Employees</small>
+                    </div>
+                    <div className="icon-wrapper icon-employees">👨‍🌾</div>
                   </div>
-                  <div className="icon-wrapper icon-employees">👨‍🌾</div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Total Sales */}
             <div className="col-12 col-sm-6 col-lg-4">
@@ -156,100 +182,136 @@ const Home = () => {
         <section className="modules-section mb-5">
           <div className="section-header mb-4">
             <h2 className="section-title text-success fw-bold">
-              <span className="me-2">⚡</span> Management Modules
+              <span className="me-2">⚡</span>{' '}
+              {isAdmin ? 'Admin Modules' : 'Staff Operations Modules'}
             </h2>
-            <p className="text-muted">Access farm control features directly</p>
+            <p className="text-muted">
+              {isAdmin
+                ? 'Authorized access for Farm Administrators'
+                : 'Authorized access for Farm Staff'}
+            </p>
           </div>
 
           <div className="row g-4">
-            {/* Chicken Management */}
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card module-card text-center p-4 shadow-sm h-100">
-                <div className="module-icon mb-3">🐔</div>
-                <h4 className="fw-bold mb-2">Chicken Management</h4>
-                <p className="text-muted mb-4 fs-7">
-                  Track chicken breeds, quantities, ages, health status, and flock purchases.
-                </p>
-                <Link to="/chickens" className="btn btn-outline-success fw-bold mt-auto w-100">
-                  Open Chicken Module
-                </Link>
-              </div>
-            </div>
-
-            {/* Feed Management */}
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card module-card text-center p-4 shadow-sm h-100">
-                <div className="module-icon mb-3">🌾</div>
-                <h4 className="fw-bold mb-2">Feed Management</h4>
-                <p className="text-muted mb-4 fs-7">
-                  Manage feed stock levels, types (Starter, Layer, Broiler), and supplier costs.
-                </p>
-                <Link to="/feed" className="btn btn-outline-success fw-bold mt-auto w-100">
-                  Open Feed Module
-                </Link>
-              </div>
-            </div>
-
-            {/* Vaccination Management */}
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card module-card text-center p-4 shadow-sm h-100">
-                <div className="module-icon mb-3">💉</div>
-                <h4 className="fw-bold mb-2">Vaccination Schedule</h4>
-                <p className="text-muted mb-4 fs-7">
-                  Record vaccination dates, vaccine names, upcoming booster doses, and remarks.
-                </p>
-                <Link to="/vaccination" className="btn btn-outline-success fw-bold mt-auto w-100">
-                  Open Vaccination Module
-                </Link>
-              </div>
-            </div>
-
-            {/* Egg Management */}
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card module-card text-center p-4 shadow-sm h-100">
-                <div className="module-icon mb-3">🥚</div>
-                <h4 className="fw-bold mb-2">Egg Management</h4>
-                <p className="text-muted mb-4 fs-7">
-                  Log daily egg production, track broken vs good eggs, and compute total revenues.
-                </p>
-                <Link to="/eggs" className="btn btn-outline-success fw-bold mt-auto w-100">
-                  Open Egg Module
-                </Link>
-              </div>
-            </div>
-
-            {/* Employee Management */}
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card module-card text-center p-4 shadow-sm h-100">
-                <div className="module-icon mb-3">👨‍🌾</div>
-                <h4 className="fw-bold mb-2">Employee Management</h4>
-                <p className="text-muted mb-4 fs-7">
-                  Manage worker records, job roles, joining dates, salaries, and attendance status.
-                </p>
-                <Link to="/employees" className="btn btn-outline-success fw-bold mt-auto w-100">
-                  Open Employee Module
-                </Link>
-              </div>
-            </div>
-
-            {/* Sales & Expenses */}
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="card module-card text-center p-4 shadow-sm h-100">
-                <div className="module-icon mb-3">💵</div>
-                <h4 className="fw-bold mb-2">Sales & Expenses</h4>
-                <p className="text-muted mb-4 fs-7">
-                  Track product sales, customer details, operational expenses, and profitability.
-                </p>
-                <div className="d-flex gap-2 mt-auto">
-                  <Link to="/sales" className="btn btn-outline-success fw-bold flex-fill">
-                    Sales
-                  </Link>
-                  <Link to="/expenses" className="btn btn-outline-danger fw-bold flex-fill">
-                    Expenses
-                  </Link>
+            {/* ADMIN ONLY MODULES */}
+            {isAdmin ? (
+              <>
+                {/* Analytics Dashboard */}
+                <div className="col-12 col-md-6">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">📊</div>
+                    <h4 className="fw-bold mb-2">Analytics & Financial Dashboard</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Comprehensive farm overview, monthly revenue vs expenses charts, egg yield trends, and profit margins.
+                    </p>
+                    <Link to="/dashboard" className="btn btn-success fw-bold mt-auto w-100 py-2">
+                      Open Analytics Dashboard
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </div>
+
+                {/* Employee Management */}
+                <div className="col-12 col-md-6">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">👨‍🌾</div>
+                    <h4 className="fw-bold mb-2">Employee Management</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Add, update, and manage employee records, job designations, monthly salaries, and work contact details.
+                    </p>
+                    <Link to="/employees" className="btn btn-outline-success fw-bold mt-auto w-100 py-2">
+                      Open Employee Module
+                    </Link>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* USER / STAFF ONLY MODULES */
+              <>
+                {/* Chicken Management */}
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">🐔</div>
+                    <h4 className="fw-bold mb-2">Chicken Management</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Track chicken breeds, quantities, ages, health status, and flock purchases.
+                    </p>
+                    <Link to="/chickens" className="btn btn-outline-success fw-bold mt-auto w-100">
+                      Open Chicken Module
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Feed Management */}
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">🌾</div>
+                    <h4 className="fw-bold mb-2">Feed Management</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Manage feed stock levels, types (Starter, Layer, Broiler), and supplier costs.
+                    </p>
+                    <Link to="/feed" className="btn btn-outline-success fw-bold mt-auto w-100">
+                      Open Feed Module
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Vaccination Management */}
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">💉</div>
+                    <h4 className="fw-bold mb-2">Vaccination Schedule</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Record vaccination dates, vaccine names, upcoming booster doses, and remarks.
+                    </p>
+                    <Link to="/vaccination" className="btn btn-outline-success fw-bold mt-auto w-100">
+                      Open Vaccination Module
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Egg Management */}
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">🥚</div>
+                    <h4 className="fw-bold mb-2">Egg Management</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Log daily egg production, track broken vs good eggs, and compute total revenues.
+                    </p>
+                    <Link to="/eggs" className="btn btn-outline-success fw-bold mt-auto w-100">
+                      Open Egg Module
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Sales Management */}
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">💰</div>
+                    <h4 className="fw-bold mb-2">Sales Management</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Record chicken and egg sales, customer names, payment methods, and invoices.
+                    </p>
+                    <Link to="/sales" className="btn btn-outline-success fw-bold mt-auto w-100">
+                      Open Sales Module
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Expense Management */}
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div className="card module-card text-center p-4 shadow-sm h-100">
+                    <div className="module-icon mb-3">💸</div>
+                    <h4 className="fw-bold mb-2">Expense Management</h4>
+                    <p className="text-muted mb-4 fs-7">
+                      Track utility bills, medical supplies, maintenance, and farm operational expenditures.
+                    </p>
+                    <Link to="/expenses" className="btn btn-outline-danger fw-bold mt-auto w-100">
+                      Open Expense Module
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </section>
 

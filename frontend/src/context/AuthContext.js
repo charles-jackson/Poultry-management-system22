@@ -19,15 +19,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const { data } = await API.post('/auth/login', { email, password });
+  const login = async (email, password, loginRole = null) => {
+    const payload = { email, password };
+    if (loginRole) payload.loginRole = loginRole;
+    const { data } = await API.post('/auth/login', payload);
     setUser(data);
     localStorage.setItem('userInfo', JSON.stringify(data));
     return data;
   };
 
-  const register = async (name, email, password) => {
-    const { data } = await API.post('/auth/register', { name, email, password });
+  const register = async (name, email, password, role = 'User') => {
+    const { data } = await API.post('/auth/register', { name, email, password, role });
     setUser(data);
     localStorage.setItem('userInfo', JSON.stringify(data));
     return data;

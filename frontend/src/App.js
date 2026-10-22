@@ -31,23 +31,43 @@ function App() {
           <Navbar />
           <main className="flex-grow-1">
             <Routes>
-              <Route path="/" element={<Home />} />
+              {/* Home is protected - requires login, accessible to both Admin & User */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Public Auth Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
-              {/* Protected Management Routes */}
+              {/* Admin-Only Routes */}
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['Admin']}>
                     <Dashboard />
                   </ProtectedRoute>
                 }
               />
               <Route
+                path="/employees"
+                element={
+                  <ProtectedRoute allowedRoles={['Admin']}>
+                    <EmployeeManagement />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* User-Only Routes */}
+              <Route
                 path="/chickens"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['User']}>
                     <ChickenManagement />
                   </ProtectedRoute>
                 }
@@ -55,7 +75,7 @@ function App() {
               <Route
                 path="/feed"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['User']}>
                     <FeedManagement />
                   </ProtectedRoute>
                 }
@@ -63,7 +83,7 @@ function App() {
               <Route
                 path="/vaccination"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['User']}>
                     <Vaccination />
                   </ProtectedRoute>
                 }
@@ -71,23 +91,15 @@ function App() {
               <Route
                 path="/eggs"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['User']}>
                     <EggManagement />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/employees"
-                element={
-                  <ProtectedRoute>
-                    <EmployeeManagement />
                   </ProtectedRoute>
                 }
               />
               <Route
                 path="/sales"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['User']}>
                     <SalesManagement />
                   </ProtectedRoute>
                 }
@@ -95,7 +107,7 @@ function App() {
               <Route
                 path="/expenses"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['User']}>
                     <ExpenseManagement />
                   </ProtectedRoute>
                 }

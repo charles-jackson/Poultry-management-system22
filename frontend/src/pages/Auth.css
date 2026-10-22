@@ -1,18 +1,19 @@
 /* Auth Page CSS */
 .auth-container {
   background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-  min-height: 85vh;
+  min-height: 88vh;
 }
 
 .auth-card {
-  max-width: 480px;
+  max-width: 520px;
   width: 100%;
   background: #ffffff;
   border-top: 5px solid #2e7d32 !important;
+  border-radius: 20px !important;
 }
 
 .auth-brand-logo {
-  font-size: 3.5rem;
+  font-size: 3.2rem;
   animation: bounceChicken 2s infinite ease-in-out;
 }
 
@@ -21,15 +22,95 @@
   50% { transform: translateY(-8px); }
 }
 
+/* Dual Role Tabs */
+.auth-role-tabs {
+  background: #f1f8e9;
+  padding: 6px;
+  border-radius: 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.auth-role-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #558b2f;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.auth-role-tab:hover {
+  background: rgba(46, 125, 50, 0.08);
+}
+
+.auth-role-tab.active {
+  background: #ffffff;
+  color: #1b5e20;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+}
+
+.auth-role-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.auth-role-tab.active .auth-role-badge {
+  background: #2e7d32;
+  color: #ffffff;
+}
+
+/* Role Selector Cards for Register */
+.role-select-box {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: #fafafa;
+}
+
+.role-select-box:hover {
+  border-color: #81c784;
+  background: #f9fbe7;
+}
+
+.role-select-box.selected {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.12);
+}
+
 .auth-submit-btn {
   background: linear-gradient(135deg, #2e7d32 0%, #1b4327 100%);
   border: none;
   border-radius: 12px;
   box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
   transition: all 0.3s ease;
+  font-weight: 700;
 }
 
 .auth-submit-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(46, 125, 50, 0.45);
+}
+
+.auth-submit-btn-admin {
+  background: linear-gradient(135deg, #e65100 0%, #bf360c 100%) !important;
+  box-shadow: 0 6px 15px rgba(230, 81, 0, 0.3) !important;
+}
+
+.auth-submit-btn-admin:hover {
+  box-shadow: 0 8px 20px rgba(230, 81, 0, 0.45) !important;
 }

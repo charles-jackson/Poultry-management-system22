@@ -8,6 +8,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('User'); // 'User' or 'Admin'
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -30,8 +31,9 @@ const Register = () => {
 
     setLoading(true);
     try {
-      await register(name, email, password);
-      navigate('/dashboard');
+      await register(name, email, password, role);
+      // Navigate to Home page
+      navigate('/');
     } catch (err) {
       const serverMsg = err.response?.data?.message;
       if (serverMsg) {
@@ -50,23 +52,54 @@ const Register = () => {
 
   return (
     <div className="auth-container d-flex align-items-center justify-content-center py-5">
-      <div className="card auth-card shadow-lg border-0 rounded-4 p-4 p-md-5">
-        <div className="text-center mb-4">
+      <div className="card auth-card shadow-lg border-0 p-4 p-md-5">
+        <div className="text-center mb-3">
           <div className="auth-brand-logo mb-2">🐔</div>
-          <h2 className="fw-extrabold text-success mb-1">Create Admin Account</h2>
-          <p className="text-muted fs-7">Register as a farm manager to access the full system</p>
+          <h2 className="fw-extrabold text-success mb-1">Create Account</h2>
+          <p className="text-muted fs-7">Select your farm role and register</p>
         </div>
 
-        {error && <div className="alert alert-danger fw-semibold shadow-sm">{error}</div>}
+        {error && <div className="alert alert-danger fw-semibold shadow-sm py-2">{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          {/* Role Selection */}
+          <div className="mb-3">
+            <label className="form-label fw-bold mb-2">Select Your Account Type</label>
+            <div className="row g-2">
+              <div className="col-6">
+                <div
+                  className={`role-select-box text-center ${role === 'User' ? 'selected' : ''}`}
+                  onClick={() => setRole('User')}
+                >
+                  <div className="fs-3 mb-1">👨‍🌾</div>
+                  <div className="fw-bold text-dark">Staff / User</div>
+                  <div className="text-muted" style={{ fontSize: '0.72rem' }}>
+                    Flock, Feed, Eggs, Sales
+                  </div>
+                </div>
+              </div>
+              <div className="col-6">
+                <div
+                  className={`role-select-box text-center ${role === 'Admin' ? 'selected' : ''}`}
+                  onClick={() => setRole('Admin')}
+                >
+                  <div className="fs-3 mb-1">👑</div>
+                  <div className="fw-bold text-dark">Administrator</div>
+                  <div className="text-muted" style={{ fontSize: '0.72rem' }}>
+                    Dashboard & Employees
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="mb-3">
             <label className="form-label fw-bold">Full Name</label>
             <input
               type="text"
               className="form-control form-control-lg rounded-3"
               required
-              placeholder="Farm Manager Name"
+              placeholder="e.g. John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -78,7 +111,7 @@ const Register = () => {
               type="email"
               className="form-control form-control-lg rounded-3"
               required
-              placeholder="manager@poultryfarm.com"
+              placeholder="e.g. worker@poultryfarm.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -111,7 +144,9 @@ const Register = () => {
 
           <button
             type="submit"
-            className="btn btn-success btn-lg w-100 fw-bold auth-submit-btn"
+            className={`btn btn-lg w-100 auth-submit-btn text-white ${
+              role === 'Admin' ? 'auth-submit-btn-admin' : ''
+            }`}
             disabled={loading}
           >
             {loading ? (
@@ -119,8 +154,10 @@ const Register = () => {
                 <span className="spinner-border spinner-border-sm me-2" role="status"></span>
                 Creating Account...
               </>
+            ) : role === 'Admin' ? (
+              '👑 Register as Administrator'
             ) : (
-              'Register & Launch Dashboard'
+              '👨‍🌾 Register as Staff / User'
             )}
           </button>
         </form>
