@@ -8,7 +8,7 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user
+// @desc    Register a new user in database
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
@@ -56,7 +56,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Auth user & get token
+// @desc    Auth user & update role in database
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
@@ -72,12 +72,9 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
-      // Determine the session role based on user selection:
-      // If user selected 'User' (Staff) tab, activeRole is 'User'.
-      // If user selected 'Admin' tab, activeRole is 'Admin'.
+      // If loginRole specified, ensure it is persisted to the database
       const activeRole = loginRole ? loginRole : (user.role || 'User');
 
-      // Update role in DB if different so future calls stay aligned
       if (loginRole && user.role !== loginRole) {
         user.role = loginRole;
         await user.save();
@@ -98,13 +95,60 @@ const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Get user profile
+// @desc    Update user role in database
+// @route   PUT /api/auth/role
+// @access  Private
+const updateRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!role || !['Admin', 'User'].includes(role)) {
+      return res.status(400).json({ message: 'Valid role (Admin or User) is required' });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        message: 'Database is not connected. Please verify the MONGO_URI environment variable on Render / Server.'
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found in database' });
+    }
+
+    user.role = role;
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get user profile directly from database
 // @route   GET /api/auth/me
 // @access  Private
 const getMe = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: 'Database is not connected.' });
+    }
     const user = await User.findById(req.user._id).select('-password');
-    res.json(user);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found in database' });
+    }
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -113,5 +157,6 @@ const getMe = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  updateRole,
   getMe,
 };
