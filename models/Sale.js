@@ -2,15 +2,29 @@ const mongoose = require('mongoose');
 
 const saleSchema = new mongoose.Schema(
   {
+    productType: {
+      type: String,
+      enum: ['Chicken', 'Eggs', 'Other'],
+      default: 'Chicken',
+    },
     product: {
       type: String,
-      required: [true, 'Please specify product'],
+      required: [true, 'Please specify product name'],
       trim: true,
+    },
+    chickenId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Chicken',
+      default: null,
     },
     quantity: {
       type: Number,
       required: [true, 'Please specify quantity'],
       min: 1,
+    },
+    deductedQuantity: {
+      type: Number,
+      default: 0,
     },
     price: {
       type: Number,

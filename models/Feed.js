@@ -41,6 +41,11 @@ const feedSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    expenseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Expense',
+      default: null,
+    },
   },
   {
     timestamps: true,

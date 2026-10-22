@@ -7,7 +7,7 @@ const FeedManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Form state
+  // Form State
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [formData, setFormData] = useState({
@@ -32,7 +32,7 @@ const FeedManagement = () => {
       const { data } = await API.get('/feed');
       setFeeds(data);
     } catch (err) {
-      console.error('Error loading feed records:', err);
+      console.error('Error fetching feed inventory:', err);
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,7 @@ const FeedManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Auto calculated Total Cost
+  // Live auto calculation
   const calculatedTotalCost = (Number(formData.quantity) || 0) * (Number(formData.price) || 0);
 
   const openAddModal = () => {
@@ -92,7 +92,7 @@ const FeedManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this feed inventory record?')) {
+    if (window.confirm('Are you sure you want to delete this feed inventory record? Any linked expense entry will also be deleted.')) {
       try {
         await API.delete(`/feed/${id}`);
         fetchFeeds();
@@ -109,6 +109,16 @@ const FeedManagement = () => {
       f.supplier.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalStockKg = feeds.reduce((acc, f) => {
+    const q = Number(f.quantity) || 0;
+    if (f.unit === 'Ton') return acc + q * 1000;
+    if (f.unit === 'Bags') return acc + q * 50; // standard approx 50kg bag
+    if (f.unit === 'Grams') return acc + q / 1000;
+    return acc + q;
+  }, 0);
+
+  const totalSpend = feeds.reduce((acc, f) => acc + (f.totalCost || (Number(f.quantity) * Number(f.price)) || 0), 0);
+
   return (
     <div className="feed-mgmt-container py-4">
       <div className="container">
@@ -116,11 +126,37 @@ const FeedManagement = () => {
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="fw-bold text-success mb-1">🌾 Feed Inventory Management</h1>
-            <p className="text-muted mb-0">Track poultry feed stock, suppliers, unit costs, and total expenditure</p>
+            <p className="text-muted mb-0">Track poultry feed stock, suppliers, unit costs, and automatic expense synchronization</p>
           </div>
           <button className="btn btn-success-glow fw-bold px-4 py-2" onClick={openAddModal}>
             ➕ Add Feed Entry
           </button>
+        </div>
+
+        {/* Quick Stat Cards */}
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-6">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">Total Feed Stock (~Kg)</div>
+                  <h3 className="fw-extrabold text-success mb-0">{Math.round(totalStockKg).toLocaleString()} Kg</h3>
+                </div>
+                <div className="fs-1">🌾</div>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 col-md-6">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">Total Feed Expenses</div>
+                  <h3 className="fw-extrabold text-danger mb-0">${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                </div>
+                <div className="fs-1">💸</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Filter Bar */}
@@ -136,23 +172,23 @@ const FeedManagement = () => {
               />
             </div>
             <div className="col-12 col-md-6 text-md-end text-muted fw-semibold">
-              Feed Entries: {filteredFeeds.length}
+              Total Feed Records: {filteredFeeds.length}
             </div>
           </div>
         </div>
 
-        {/* Data Table */}
+        {/* Table */}
         <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
           <div className="card-body p-0">
             {loading ? (
               <div className="text-center py-5">
                 <div className="spinner-border text-success" role="status"></div>
-                <p className="mt-2 text-muted">Loading feed data...</p>
+                <p className="mt-2 text-muted">Loading feed inventory...</p>
               </div>
             ) : filteredFeeds.length === 0 ? (
               <div className="text-center py-5 text-muted">
-                <h5>No feed inventory records found.</h5>
-                <p className="mb-0">Click "Add Feed Entry" to create a new record.</p>
+                <h5>No feed stock recorded yet.</h5>
+                <p className="mb-0">Click "Add Feed Entry" to log feed purchases.</p>
               </div>
             ) : (
               <div className="table-responsive">
@@ -161,52 +197,60 @@ const FeedManagement = () => {
                     <tr>
                       <th>#</th>
                       <th>Feed Name</th>
-                      <th>Feed Type</th>
+                      <th>Category Type</th>
                       <th>Quantity</th>
-                      <th>Price / Unit</th>
-                      <th>Total Cost</th>
+                      <th>Price/Unit</th>
+                      <th>Total Cost & Expense</th>
                       <th>Supplier</th>
                       <th>Date</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredFeeds.map((feed, index) => (
-                      <tr key={feed._id}>
-                        <td className="fw-bold">{index + 1}</td>
-                        <td className="fw-bold text-dark">{feed.feedName}</td>
-                        <td>
-                          <span className="badge bg-success-subtle text-success border px-3 py-2 fw-semibold">
-                            {feed.feedType}
-                          </span>
-                        </td>
-                        <td className="fw-bold">
-                          {feed.quantity} {feed.unit}
-                        </td>
-                        <td>${feed.price}</td>
-                        <td className="fw-bold text-success">${feed.totalCost || feed.quantity * feed.price}</td>
-                        <td className="text-muted">{feed.supplier}</td>
-                        <td className="text-muted">
-                          {new Date(feed.date).toLocaleDateString()}
-                        </td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            <button
-                              className="btn btn-sm btn-outline-primary fw-bold hover-lift"
-                              onClick={() => openEditModal(feed)}
-                            >
-                              ✏️ Edit
-                            </button>
-                            <button
-                              className="btn btn-sm btn-outline-danger fw-bold hover-lift"
-                              onClick={() => handleDelete(feed._id)}
-                            >
-                              🗑️ Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredFeeds.map((feed, index) => {
+                      const cost = feed.totalCost || (feed.quantity * feed.price);
+                      return (
+                        <tr key={feed._id}>
+                          <td className="fw-bold">{index + 1}</td>
+                          <td className="fw-bold text-dark">{feed.feedName}</td>
+                          <td>
+                            <span className="badge bg-success-subtle text-success border px-3 py-2 fw-semibold">
+                              {feed.feedType}
+                            </span>
+                          </td>
+                          <td className="fw-bold">
+                            {feed.quantity} {feed.unit}
+                          </td>
+                          <td>${feed.price}</td>
+                          <td>
+                            <div className="fw-bold text-success">${Number(cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                            <small className="text-danger fw-semibold" title="Synced to Expense Management">
+                              💸 Synced Expense
+                            </small>
+                          </td>
+                          <td className="text-muted">{feed.supplier}</td>
+                          <td className="text-muted">
+                            {new Date(feed.date).toLocaleDateString()}
+                          </td>
+                          <td>
+                            <div className="d-flex gap-2">
+                              <button
+                                className="btn btn-sm btn-outline-primary fw-bold hover-lift"
+                                onClick={() => openEditModal(feed)}
+                              >
+                                ✏️ Edit
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger fw-bold hover-lift"
+                                onClick={() => handleDelete(feed._id)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -232,6 +276,18 @@ const FeedManagement = () => {
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
+                  {/* Expense Notice */}
+                  <div className="alert alert-warning border-warning d-flex align-items-center gap-2 mb-3 py-2">
+                    <span className="fs-4">💡</span>
+                    <div style={{ fontSize: '0.88rem' }}>
+                      <strong>Expense Integration Active:</strong> When saved, this purchase total of{' '}
+                      <strong>
+                        ${calculatedTotalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </strong>{' '}
+                      will automatically be added under <strong>Expense Management</strong> as <em>"Feed Purchase"</em>.
+                    </div>
+                  </div>
+
                   <div className="mb-3">
                     <label className="form-label fw-bold">Feed Name</label>
                     <input
@@ -309,9 +365,11 @@ const FeedManagement = () => {
                   </div>
 
                   {/* Auto Calculated Total Cost Display */}
-                  <div className="alert alert-success d-flex justify-content-between align-items-center mb-3">
-                    <span className="fw-bold">Auto Calculated Total Cost:</span>
-                    <span className="fs-5 fw-extrabold text-success">${calculatedTotalCost.toFixed(2)}</span>
+                  <div className="alert alert-success d-flex justify-content-between align-items-center mb-3 py-2">
+                    <span className="fw-bold">Calculated Purchase Cost:</span>
+                    <span className="fs-5 fw-extrabold text-success">
+                      ${calculatedTotalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
                   </div>
 
                   <div className="row g-3 mb-3">
@@ -328,7 +386,7 @@ const FeedManagement = () => {
                       />
                     </div>
                     <div className="col-6">
-                      <label className="form-label fw-bold">Date</label>
+                      <label className="form-label fw-bold">Purchase Date</label>
                       <input
                         type="date"
                         className="form-control"
@@ -350,7 +408,7 @@ const FeedManagement = () => {
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-success fw-bold px-4">
-                    {isEditing ? 'Save Changes' : 'Save Record'}
+                    {isEditing ? 'Save Changes' : 'Save & Record Expense'}
                   </button>
                 </div>
               </form>
