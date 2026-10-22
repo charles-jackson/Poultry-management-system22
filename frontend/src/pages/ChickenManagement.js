@@ -228,8 +228,6 @@ const ChickenManagement = () => {
                       <th>Age</th>
                       <th>Gender</th>
                       <th>Health Status</th>
-                      <th>Purchase Date</th>
-                      <th>Unit Price / Expense</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -248,8 +246,18 @@ const ChickenManagement = () => {
                                 <span className="badge bg-warning text-dark px-2 py-1">
                                   🚚 Outside Purchase
                                 </span>
-                                {chicken.supplier && (
+                                {totalCost > 0 && (
+                                  <div className="text-danger fw-bold mt-1" style={{ fontSize: '0.78rem' }}>
+                                    Expense: ${totalCost.toLocaleString()} (${chicken.price}/unit)
+                                  </div>
+                                )}
+                                {chicken.purchaseDate && (
                                   <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                                    Date: {new Date(chicken.purchaseDate).toLocaleDateString()}
+                                  </div>
+                                )}
+                                {chicken.supplier && (
+                                  <div className="text-muted" style={{ fontSize: '0.72rem' }}>
                                     From: {chicken.supplier}
                                   </div>
                                 )}
@@ -281,29 +289,6 @@ const ChickenManagement = () => {
                             >
                               {chicken.healthStatus}
                             </span>
-                          </td>
-                          <td>
-                            {isOutside && chicken.purchaseDate ? (
-                              new Date(chicken.purchaseDate).toLocaleDateString()
-                            ) : (
-                              <span className="text-muted">—</span>
-                            )}
-                          </td>
-                          <td>
-                            {isOutside ? (
-                              <>
-                                <div className="fw-bold text-dark">${chicken.price}/unit</div>
-                                {totalCost > 0 && (
-                                  <small className="text-danger fw-semibold" title="Synced to Expense Management">
-                                    💸 Expense: ${totalCost.toLocaleString()}
-                                  </small>
-                                )}
-                              </>
-                            ) : (
-                              <span className="badge bg-light text-muted border px-2 py-1">
-                                Farm Stock
-                              </span>
-                            )}
                           </td>
                           <td>
                             <div className="d-flex gap-2">
