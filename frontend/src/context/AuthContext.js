@@ -15,10 +15,11 @@ export const AuthProvider = ({ children }) => {
         try {
           const parsed = JSON.parse(stored);
           if (parsed && parsed.token) {
-            // Fetch live user profile and role directly from MongoDB database
+            // Fetch live user profile directly from MongoDB database
             const { data } = await API.get('/auth/me');
             const updatedUser = {
               ...data,
+              role: data.role || parsed.role || 'User',
               token: parsed.token,
             };
             setUser(updatedUser);
@@ -46,39 +47,31 @@ export const AuthProvider = ({ children }) => {
     // Save/validate directly in MongoDB database
     const { data } = await API.post('/auth/login', payload);
 
-    setUser(data);
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    return data;
+    // Guaranteed role assignment: if user clicked Staff tab, role is ALWAYS 'User'
+    const finalRole = loginRole ? loginRole : (data.role || 'User');
+    const sessionUser = {
+      ...data,
+      role: finalRole,
+    };
+
+    setUser(sessionUser);
+    localStorage.setItem('userInfo', JSON.stringify(sessionUser));
+    return sessionUser;
   };
 
   const register = async (name, email, password, role = 'User') => {
     // Save directly in MongoDB database
     const { data } = await API.post('/auth/register', { name, email, password, role });
     
-    setUser(data);
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    return data;
-  };
+    const finalRole = role ? role : (data.role || 'User');
+    const sessionUser = {
+      ...data,
+      role: finalRole,
+    };
 
-  const switchRole = async (newRole) => {
-    if (!user) return;
-    try {
-      // Persist role change directly to MongoDB database
-      const { data } = await API.put('/auth/role', { role: newRole });
-      const updatedUser = {
-        ...data,
-        token: user.token,
-      };
-      setUser(updatedUser);
-      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
-      return updatedUser;
-    } catch (err) {
-      console.error('Failed to update role in database:', err);
-      // Fallback local update if network hiccups
-      const fallbackUser = { ...user, role: newRole };
-      setUser(fallbackUser);
-      localStorage.setItem('userInfo', JSON.stringify(fallbackUser));
-    }
+    setUser(sessionUser);
+    localStorage.setItem('userInfo', JSON.stringify(sessionUser));
+    return sessionUser;
   };
 
   const logout = () => {
@@ -87,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, switchRole, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
