@@ -26,15 +26,30 @@ const chickenSchema = new mongoose.Schema(
       enum: ['Healthy', 'Sick', 'Vaccinated', 'Quarantine', 'Under Treatment'],
       default: 'Healthy',
     },
+    source: {
+      type: String,
+      enum: ['Available in Farm', 'Brought from Outside'],
+      default: 'Available in Farm',
+    },
+    supplier: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     purchaseDate: {
       type: Date,
-      required: [true, 'Please specify the purchase date'],
+      required: [true, 'Please specify the date'],
       default: Date.now,
     },
     price: {
       type: Number,
-      required: [true, 'Please specify the price'],
+      default: 0,
       min: 0,
+    },
+    expenseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Expense',
+      default: null,
     },
   },
   {

@@ -17,6 +17,8 @@ const ChickenManagement = () => {
     age: '',
     gender: 'Hen',
     healthStatus: 'Healthy',
+    source: 'Available in Farm', // 'Available in Farm' or 'Brought from Outside'
+    supplier: '',
     purchaseDate: new Date().toISOString().split('T')[0],
     price: '',
   });
@@ -54,6 +56,8 @@ const ChickenManagement = () => {
       age: '',
       gender: 'Hen',
       healthStatus: 'Healthy',
+      source: 'Available in Farm',
+      supplier: '',
       purchaseDate: new Date().toISOString().split('T')[0],
       price: '',
     });
@@ -69,6 +73,8 @@ const ChickenManagement = () => {
       age: chicken.age,
       gender: chicken.gender,
       healthStatus: chicken.healthStatus,
+      source: chicken.source || 'Available in Farm',
+      supplier: chicken.supplier || '',
       purchaseDate: new Date(chicken.purchaseDate).toISOString().split('T')[0],
       price: chicken.price,
     });
@@ -91,7 +97,7 @@ const ChickenManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this chicken record?')) {
+    if (window.confirm('Are you sure you want to delete this chicken record? Any automatically linked purchase expense will also be removed.')) {
       try {
         await API.delete(`/chickens/${id}`);
         fetchChickens();
@@ -104,8 +110,16 @@ const ChickenManagement = () => {
   const filteredChickens = chickens.filter((c) =>
     c.breed.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.healthStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.gender.toLowerCase().includes(searchTerm.toLowerCase())
+    c.gender.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.source && c.source.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (c.supplier && c.supplier.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const totalFlockCount = chickens.reduce((acc, c) => acc + (Number(c.quantity) || 0), 0);
+  const outsideCount = chickens
+    .filter((c) => c.source === 'Brought from Outside')
+    .reduce((acc, c) => acc + (Number(c.quantity) || 0), 0);
+  const farmRaisedCount = totalFlockCount - outsideCount;
 
   return (
     <div className="chicken-mgmt-container py-4">
@@ -114,7 +128,9 @@ const ChickenManagement = () => {
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="fw-bold text-success mb-1">🐔 Chicken Flock Management</h1>
-            <p className="text-muted mb-0">Record breed details, health status, quantity, and flock purchases</p>
+            <p className="text-muted mb-0">
+              Record farm-raised chickens and outside flock purchases with automatic expense tracking
+            </p>
           </div>
           <button className="btn btn-success-glow fw-bold px-4 py-2" onClick={openAddModal}>
             ➕ Add Chicken Record
@@ -123,6 +139,43 @@ const ChickenManagement = () => {
 
         {error && <div className="alert alert-danger shadow-sm">{error}</div>}
 
+        {/* Quick Stat Cards */}
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-4">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">Total Chickens</div>
+                  <h3 className="fw-extrabold text-success mb-0">{totalFlockCount.toLocaleString()}</h3>
+                </div>
+                <div className="fs-2">🐔</div>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 col-md-4">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">🏡 Available in Farm</div>
+                  <h3 className="fw-extrabold text-primary mb-0">{farmRaisedCount.toLocaleString()}</h3>
+                </div>
+                <div className="fs-2">🌾</div>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 col-md-4">
+            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">🚚 Brought from Outside</div>
+                  <h3 className="fw-extrabold text-warning mb-0">{outsideCount.toLocaleString()}</h3>
+                </div>
+                <div className="fs-2">📦</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Search Bar */}
         <div className="card border-0 shadow-sm rounded-4 mb-4 p-3 search-card">
           <div className="row g-3 align-items-center">
@@ -130,7 +183,7 @@ const ChickenManagement = () => {
               <input
                 type="text"
                 className="form-control rounded-3 border-success-subtle"
-                placeholder="🔍 Search by breed, gender, or health status..."
+                placeholder="🔍 Search by breed, gender, source, or health status..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -161,58 +214,93 @@ const ChickenManagement = () => {
                     <tr>
                       <th>#</th>
                       <th>Breed</th>
+                      <th>Source</th>
                       <th>Quantity</th>
                       <th>Age</th>
                       <th>Gender</th>
                       <th>Health Status</th>
-                      <th>Purchase Date</th>
-                      <th>Price per Unit</th>
+                      <th>Date</th>
+                      <th>Price / Total</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredChickens.map((chicken, index) => (
-                      <tr key={chicken._id}>
-                        <td className="fw-bold">{index + 1}</td>
-                        <td className="fw-bold text-dark">{chicken.breed}</td>
-                        <td>
-                          <span className="badge bg-light text-dark border px-3 py-2 fw-bold fs-6">
-                            {chicken.quantity}
-                          </span>
-                        </td>
-                        <td>{chicken.age}</td>
-                        <td>{chicken.gender}</td>
-                        <td>
-                          <span className={`badge px-3 py-2 ${
-                            chicken.healthStatus === 'Healthy' ? 'bg-success' :
-                            chicken.healthStatus === 'Sick' ? 'bg-danger' :
-                            chicken.healthStatus === 'Vaccinated' ? 'bg-primary' : 'bg-warning text-dark'
-                          }`}>
-                            {chicken.healthStatus}
-                          </span>
-                        </td>
-                        <td>
-                          {new Date(chicken.purchaseDate).toLocaleDateString()}
-                        </td>
-                        <td className="fw-bold text-success">${chicken.price}</td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            <button
-                              className="btn btn-sm btn-outline-primary fw-bold hover-lift"
-                              onClick={() => openEditModal(chicken)}
+                    {filteredChickens.map((chicken, index) => {
+                      const isOutside = chicken.source === 'Brought from Outside';
+                      const totalCost = (Number(chicken.price) || 0) * (Number(chicken.quantity) || 1);
+
+                      return (
+                        <tr key={chicken._id}>
+                          <td className="fw-bold">{index + 1}</td>
+                          <td className="fw-bold text-dark">{chicken.breed}</td>
+                          <td>
+                            {isOutside ? (
+                              <div>
+                                <span className="badge bg-warning text-dark px-2 py-1">
+                                  🚚 Outside Purchase
+                                </span>
+                                {chicken.supplier && (
+                                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                                    From: {chicken.supplier}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="badge bg-success-subtle text-success px-2 py-1">
+                                🏡 Farm Raised
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            <span className="badge bg-light text-dark border px-3 py-2 fw-bold fs-6">
+                              {chicken.quantity}
+                            </span>
+                          </td>
+                          <td>{chicken.age}</td>
+                          <td>{chicken.gender}</td>
+                          <td>
+                            <span
+                              className={`badge px-3 py-2 ${
+                                chicken.healthStatus === 'Healthy'
+                                  ? 'bg-success'
+                                  : chicken.healthStatus === 'Sick'
+                                  ? 'bg-danger'
+                                  : chicken.healthStatus === 'Vaccinated'
+                                  ? 'bg-primary'
+                                  : 'bg-warning text-dark'
+                              }`}
                             >
-                              ✏️ Edit
-                            </button>
-                            <button
-                              className="btn btn-sm btn-outline-danger fw-bold hover-lift"
-                              onClick={() => handleDelete(chicken._id)}
-                            >
-                              🗑️ Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              {chicken.healthStatus}
+                            </span>
+                          </td>
+                          <td>{new Date(chicken.purchaseDate).toLocaleDateString()}</td>
+                          <td>
+                            <div className="fw-bold text-dark">${chicken.price}/unit</div>
+                            {isOutside && totalCost > 0 && (
+                              <small className="text-danger fw-semibold" title="Synced to Expense Management">
+                                💸 Expense: ${totalCost.toLocaleString()}
+                              </small>
+                            )}
+                          </td>
+                          <td>
+                            <div className="d-flex gap-2">
+                              <button
+                                className="btn btn-sm btn-outline-primary fw-bold hover-lift"
+                                onClick={() => openEditModal(chicken)}
+                              >
+                                ✏️ Edit
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger fw-bold hover-lift"
+                                onClick={() => handleDelete(chicken._id)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -224,11 +312,11 @@ const ChickenManagement = () => {
       {/* Add / Edit Modal */}
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content rounded-4 border-0 shadow">
               <div className="modal-header bg-success text-white">
                 <h5 className="modal-title fw-bold">
-                  {isEditing ? '✏️ Edit Chicken Record' : '🐔 Add New Chicken Record'}
+                  {isEditing ? '✏️ Edit Chicken Record' : '🐔 Add Chicken Flock Record'}
                 </h5>
                 <button
                   type="button"
@@ -238,21 +326,75 @@ const ChickenManagement = () => {
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Chicken Breed</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="breed"
-                      required
-                      placeholder="e.g. Rhode Island Red, Leghorn, Broiler"
-                      value={formData.breed}
-                      onChange={handleInputChange}
-                    />
+                  {/* Origin / Source Selector */}
+                  <div className="mb-4">
+                    <label className="form-label fw-bold mb-2">Flock Source / Origin</label>
+                    <div className="row g-3">
+                      <div className="col-12 col-md-6">
+                        <div
+                          className={`p-3 rounded-3 border text-center cursor-pointer ${
+                            formData.source === 'Available in Farm'
+                              ? 'border-success bg-success-subtle shadow-sm'
+                              : 'border-secondary-subtle bg-light'
+                          }`}
+                          style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+                          onClick={() => setFormData((prev) => ({ ...prev, source: 'Available in Farm' }))}
+                        >
+                          <div className="fs-3 mb-1">🏡</div>
+                          <div className="fw-bold text-dark">Available in Farm</div>
+                          <small className="text-muted">Raised on farm / existing flock (No expense added)</small>
+                        </div>
+                      </div>
+                      <div className="col-12 col-md-6">
+                        <div
+                          className={`p-3 rounded-3 border text-center cursor-pointer ${
+                            formData.source === 'Brought from Outside'
+                              ? 'border-warning bg-warning-subtle shadow-sm'
+                              : 'border-secondary-subtle bg-light'
+                          }`}
+                          style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+                          onClick={() => setFormData((prev) => ({ ...prev, source: 'Brought from Outside' }))}
+                        >
+                          <div className="fs-3 mb-1">🚚</div>
+                          <div className="fw-bold text-dark">Brought from Outside</div>
+                          <small className="text-muted">Purchased flock (Auto-adds to Expense Management)</small>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
+                  {/* Informational banner when Brought from Outside */}
+                  {formData.source === 'Brought from Outside' && (
+                    <div className="alert alert-warning border-warning d-flex align-items-center gap-2 mb-4 py-2">
+                      <span className="fs-4">💡</span>
+                      <div style={{ fontSize: '0.88rem' }}>
+                        <strong>Expense Integration Active:</strong> When saved, a total purchase cost of{' '}
+                        <strong>
+                          $
+                          {(
+                            (Number(formData.price) || 0) * (Number(formData.quantity) || 0)
+                          ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </strong>{' '}
+                        will automatically be created under <strong>Expense Management</strong> as{' '}
+                        <em>"Chicken Purchase"</em>.
+                      </div>
+                    </div>
+                  )}
+
                   <div className="row g-3 mb-3">
-                    <div className="col-6">
+                    <div className="col-12 col-md-8">
+                      <label className="form-label fw-bold">Chicken Breed</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="breed"
+                        required
+                        placeholder="e.g. Rhode Island Red, Leghorn, Broiler, Kadaknath"
+                        value={formData.breed}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="col-12 col-md-4">
                       <label className="form-label fw-bold">Quantity</label>
                       <input
                         type="number"
@@ -265,22 +407,36 @@ const ChickenManagement = () => {
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div className="col-6">
+                  </div>
+
+                  {formData.source === 'Brought from Outside' && (
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Supplier / Vendor / Origin (Optional)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="supplier"
+                        placeholder="e.g. Sunrise Hatchery, Local Poultry Market"
+                        value={formData.supplier}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+
+                  <div className="row g-3 mb-3">
+                    <div className="col-12 col-md-4">
                       <label className="form-label fw-bold">Age</label>
                       <input
                         type="text"
                         className="form-control"
                         name="age"
                         required
-                        placeholder="e.g. 6 weeks, 3 months"
+                        placeholder="e.g. 4 weeks, 2 months"
                         value={formData.age}
                         onChange={handleInputChange}
                       />
                     </div>
-                  </div>
-
-                  <div className="row g-3 mb-3">
-                    <div className="col-6">
+                    <div className="col-12 col-md-4">
                       <label className="form-label fw-bold">Gender</label>
                       <select
                         className="form-select"
@@ -294,7 +450,7 @@ const ChickenManagement = () => {
                         <option value="Mixed">Mixed</option>
                       </select>
                     </div>
-                    <div className="col-6">
+                    <div className="col-12 col-md-4">
                       <label className="form-label fw-bold">Health Status</label>
                       <select
                         className="form-select"
@@ -312,8 +468,10 @@ const ChickenManagement = () => {
                   </div>
 
                   <div className="row g-3 mb-3">
-                    <div className="col-6">
-                      <label className="form-label fw-bold">Purchase Date</label>
+                    <div className="col-12 col-md-6">
+                      <label className="form-label fw-bold">
+                        {formData.source === 'Brought from Outside' ? 'Purchase Date' : 'Record Date'}
+                      </label>
                       <input
                         type="date"
                         className="form-control"
@@ -323,8 +481,12 @@ const ChickenManagement = () => {
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div className="col-6">
-                      <label className="form-label fw-bold">Price per Unit ($)</label>
+                    <div className="col-12 col-md-6">
+                      <label className="form-label fw-bold">
+                        {formData.source === 'Brought from Outside'
+                          ? 'Purchase Price per Unit ($)'
+                          : 'Estimated Unit Value ($)'}
+                      </label>
                       <input
                         type="number"
                         className="form-control"

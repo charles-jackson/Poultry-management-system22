@@ -5,8 +5,17 @@ const expenseSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Please specify expense category'],
-      enum: ['Feed Purchase', 'Vaccination & Medicine', 'Utilities & Water', 'Salaries', 'Equipment & Maintenance', 'Transport & Fuel', 'Other'],
-      default: 'Feed Purchase',
+      enum: [
+        'Chicken Purchase',
+        'Feed Purchase',
+        'Vaccination & Medicine',
+        'Utilities & Water',
+        'Salaries',
+        'Equipment & Maintenance',
+        'Transport & Fuel',
+        'Other',
+      ],
+      default: 'Chicken Purchase',
     },
     description: {
       type: String,

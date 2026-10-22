@@ -11,7 +11,7 @@ const ExpenseManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [formData, setFormData] = useState({
-    category: 'Feed Purchase',
+    category: 'Chicken Purchase',
     description: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
@@ -45,7 +45,7 @@ const ExpenseManagement = () => {
     setIsEditing(false);
     setCurrentId(null);
     setFormData({
-      category: 'Feed Purchase',
+      category: 'Chicken Purchase',
       description: '',
       amount: '',
       date: new Date().toISOString().split('T')[0],
@@ -83,12 +83,12 @@ const ExpenseManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this expense entry?')) {
+    if (window.confirm('Are you sure you want to delete this expense record?')) {
       try {
         await API.delete(`/expenses/${id}`);
         fetchExpenses();
       } catch (err) {
-        alert(err.response?.data?.message || 'Delete failed');
+        alert(err.response?.data?.message || 'Failed to delete record');
       }
     }
   };
@@ -96,21 +96,39 @@ const ExpenseManagement = () => {
   const filteredExpenses = expenses.filter(
     (ex) =>
       ex.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ex.description.toLowerCase().includes(searchTerm.toLowerCase())
+      ex.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (ex.remarks && ex.remarks.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  const totalExpense = expenses.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+
   return (
-    <div className="expense-mgmt-container py-4">
+    <div className="expense-container py-4">
       <div className="container">
-        {/* Header */}
+        {/* Header Section */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="fw-bold text-danger mb-1">💸 Farm Expense Management</h1>
-            <p className="text-muted mb-0">Record operational expenses including feed purchases, veterinary costs, utilities, and wages</p>
+            <p className="text-muted mb-0">Track chicken flock purchases, feed costs, utilities, medicines, and farm maintenance</p>
           </div>
           <button className="btn btn-danger-glow fw-bold px-4 py-2" onClick={openAddModal}>
             ➕ Add Expense Entry
           </button>
+        </div>
+
+        {/* Expense Summary Metric Card */}
+        <div className="row g-4 mb-4">
+          <div className="col-12 col-md-6 col-lg-4">
+            <div className="card stat-card border-0 shadow-sm rounded-4 p-3 bg-white">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="text-muted fw-semibold fs-7">Total Recorded Expenses</div>
+                  <h3 className="fw-extrabold text-danger mb-0">${totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                </div>
+                <div className="fs-1 text-danger">🧾</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -120,7 +138,7 @@ const ExpenseManagement = () => {
               <input
                 type="text"
                 className="form-control rounded-3 border-danger-subtle"
-                placeholder="🔍 Search category or description..."
+                placeholder="🔍 Search category, description, or remarks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -142,7 +160,7 @@ const ExpenseManagement = () => {
             ) : filteredExpenses.length === 0 ? (
               <div className="text-center py-5 text-muted">
                 <h5>No expense records found.</h5>
-                <p className="mb-0">Click "Add Expense Entry" to record operational costs.</p>
+                <p className="mb-0">Click "Add Expense Entry" or purchase chickens from outside to see expenses here.</p>
               </div>
             ) : (
               <div className="table-responsive">
@@ -159,38 +177,47 @@ const ExpenseManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredExpenses.map((ex, index) => (
-                      <tr key={ex._id}>
-                        <td className="fw-bold">{index + 1}</td>
-                        <td>
-                          <span className="badge bg-danger-subtle text-danger border border-danger px-3 py-2 fw-bold">
-                            {ex.category}
-                          </span>
-                        </td>
-                        <td className="fw-semibold text-dark">{ex.description}</td>
-                        <td className="fw-extrabold text-danger">${ex.amount.toFixed(2)}</td>
-                        <td className="text-muted">
-                          {new Date(ex.date).toLocaleDateString()}
-                        </td>
-                        <td className="text-muted">{ex.remarks || '—'}</td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            <button
-                              className="btn btn-sm btn-outline-primary fw-bold hover-lift"
-                              onClick={() => openEditModal(ex)}
+                    {filteredExpenses.map((ex, index) => {
+                      const isChicken = ex.category === 'Chicken Purchase';
+                      return (
+                        <tr key={ex._id}>
+                          <td className="fw-bold">{index + 1}</td>
+                          <td>
+                            <span
+                              className={`badge px-3 py-2 fw-bold ${
+                                isChicken
+                                  ? 'bg-warning text-dark border border-warning'
+                                  : 'bg-danger-subtle text-danger border border-danger'
+                              }`}
                             >
-                              ✏️ Edit
-                            </button>
-                            <button
-                              className="btn btn-sm btn-outline-danger fw-bold hover-lift"
-                              onClick={() => handleDelete(ex._id)}
-                            >
-                              🗑️ Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              {isChicken ? '🐔 Chicken Purchase' : ex.category}
+                            </span>
+                          </td>
+                          <td className="fw-semibold text-dark">{ex.description}</td>
+                          <td className="fw-extrabold text-danger">${Number(ex.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td className="text-muted">
+                            {new Date(ex.date).toLocaleDateString()}
+                          </td>
+                          <td className="text-muted">{ex.remarks || '—'}</td>
+                          <td>
+                            <div className="d-flex gap-2">
+                              <button
+                                className="btn btn-sm btn-outline-primary fw-bold hover-lift"
+                                onClick={() => openEditModal(ex)}
+                              >
+                                ✏️ Edit
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger fw-bold hover-lift"
+                                onClick={() => handleDelete(ex._id)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -225,6 +252,7 @@ const ExpenseManagement = () => {
                         value={formData.category}
                         onChange={handleInputChange}
                       >
+                        <option value="Chicken Purchase">🐔 Chicken Purchase</option>
                         <option value="Feed Purchase">Feed Purchase</option>
                         <option value="Vaccination & Medicine">Vaccination & Medicine</option>
                         <option value="Utilities & Water">Utilities & Water</option>
@@ -257,14 +285,14 @@ const ExpenseManagement = () => {
                       className="form-control"
                       name="description"
                       required
-                      placeholder="e.g. Bought 20 bags layer feed from supplier"
+                      placeholder="e.g. Purchased 100 Broilers from local market"
                       value={formData.description}
                       onChange={handleInputChange}
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Expense Date</label>
+                    <label className="form-label fw-bold">Date</label>
                     <input
                       type="date"
                       className="form-control"
@@ -276,12 +304,12 @@ const ExpenseManagement = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Remarks</label>
+                    <label className="form-label fw-bold">Remarks / Supplier Notes (Optional)</label>
                     <textarea
                       className="form-control"
                       name="remarks"
                       rows="2"
-                      placeholder="Additional details..."
+                      placeholder="Payment details, receipt number, vendor details..."
                       value={formData.remarks}
                       onChange={handleInputChange}
                     ></textarea>
@@ -297,7 +325,7 @@ const ExpenseManagement = () => {
                     Cancel
                   </button>
                   <button type="submit" className="btn btn-danger fw-bold px-4">
-                    {isEditing ? 'Save Changes' : 'Save Record'}
+                    {isEditing ? 'Save Changes' : 'Record Expense'}
                   </button>
                 </div>
               </form>
