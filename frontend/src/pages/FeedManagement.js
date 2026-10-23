@@ -151,7 +151,7 @@ const FeedManagement = () => {
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <div className="text-muted fw-semibold fs-7">Total Feed Expenses</div>
-                  <h3 className="fw-extrabold text-danger mb-0">${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                  <h3 className="fw-extrabold text-danger mb-0">₹{totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                 </div>
                 <div className="fs-1">💸</div>
               </div>
@@ -221,9 +221,9 @@ const FeedManagement = () => {
                           <td className="fw-bold">
                             {feed.quantity} {feed.unit}
                           </td>
-                          <td>${feed.price}</td>
+                          <td>₹{feed.price}</td>
                           <td>
-                            <div className="fw-bold text-success">${Number(cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                            <div className="fw-bold text-success">₹{Number(cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                             <small className="text-danger fw-semibold" title="Synced to Expense Management">
                               💸 Synced Expense
                             </small>
@@ -282,7 +282,7 @@ const FeedManagement = () => {
                     <div style={{ fontSize: '0.88rem' }}>
                       <strong>Expense Integration Active:</strong> When saved, this purchase total of{' '}
                       <strong>
-                        ${calculatedTotalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ₹{calculatedTotalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </strong>{' '}
                       will automatically be added under <strong>Expense Management</strong> as <em>"Feed Purchase"</em>.
                     </div>
@@ -349,7 +349,7 @@ const FeedManagement = () => {
                       />
                     </div>
                     <div className="col-6">
-                      <label className="form-label fw-bold">Price per Unit ($)</label>
+                      <label className="form-label fw-bold">Price per Unit (₹)</label>
                       <input
                         type="number"
                         className="form-control"
@@ -368,7 +368,7 @@ const FeedManagement = () => {
                   <div className="alert alert-success d-flex justify-content-between align-items-center mb-3 py-2">
                     <span className="fw-bold">Calculated Purchase Cost:</span>
                     <span className="fs-5 fw-extrabold text-success">
-                      ${calculatedTotalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ₹{calculatedTotalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
 

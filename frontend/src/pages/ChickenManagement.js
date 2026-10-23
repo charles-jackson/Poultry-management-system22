@@ -248,7 +248,7 @@ const ChickenManagement = () => {
                                 </span>
                                 {totalCost > 0 && (
                                   <div className="text-danger fw-bold mt-1" style={{ fontSize: '0.78rem' }}>
-                                    Expense: ${totalCost.toLocaleString()} (${chicken.price}/unit)
+                                    Expense: ₹{totalCost.toLocaleString()} (₹{chicken.price}/unit)
                                   </div>
                                 )}
                                 {chicken.purchaseDate && (
@@ -378,7 +378,7 @@ const ChickenManagement = () => {
                       <div style={{ fontSize: '0.88rem' }}>
                         <strong>Expense Integration Active:</strong> When saved, purchase total of{' '}
                         <strong>
-                          $
+                          ₹
                           {(
                             (Number(formData.price) || 0) * (Number(formData.quantity) || 0)
                           ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -496,7 +496,7 @@ const ChickenManagement = () => {
                           />
                         </div>
                         <div className="col-12 col-md-6">
-                          <label className="form-label fw-bold">Purchase Price per Unit ($)</label>
+                          <label className="form-label fw-bold">Purchase Price per Unit (₹)</label>
                           <input
                             type="number"
                             className="form-control"

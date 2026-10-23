@@ -185,7 +185,7 @@ const EmployeeManagement = () => {
                         <td className="text-muted">
                           {new Date(emp.joiningDate).toLocaleDateString()}
                         </td>
-                        <td className="fw-bold text-success">${emp.salary.toLocaleString()}</td>
+                        <td className="fw-bold text-success">₹{emp.salary.toLocaleString()}</td>
                         <td>
                           <span className={`badge px-3 py-2 ${
                             emp.attendance === 'Present' ? 'bg-success' :
@@ -320,7 +320,7 @@ const EmployeeManagement = () => {
 
                   <div className="row g-3 mb-3">
                     <div className="col-6">
-                      <label className="form-label fw-bold">Monthly Salary ($)</label>
+                      <label className="form-label fw-bold">Monthly Salary (₹)</label>
                       <input
                         type="number"
                         className="form-control"

@@ -148,7 +148,7 @@ const Vaccination = () => {
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <div className="text-muted fw-semibold fs-7">Vaccination Expenses</div>
-                  <h3 className="fw-extrabold text-danger mb-0">${totalVaccinationCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                  <h3 className="fw-extrabold text-danger mb-0">₹{totalVaccinationCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                 </div>
                 <div className="fs-1">💸</div>
               </div>
@@ -229,7 +229,7 @@ const Vaccination = () => {
                           {Number(v.cost) > 0 ? (
                             <>
                               <div className="fw-bold text-danger">
-                                ${Number(v.cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ₹{Number(v.cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </div>
                               <small className="text-danger fw-semibold" title="Synced to Expense Management">
                                 💸 Synced Expense
@@ -339,7 +339,7 @@ const Vaccination = () => {
                       />
                     </div>
                     <div className="col-12 col-md-3">
-                      <label className="form-label fw-bold">Vaccine Cost ($)</label>
+                      <label className="form-label fw-bold">Vaccine Cost (₹)</label>
                       <input
                         type="number"
                         className="form-control"

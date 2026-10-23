@@ -237,7 +237,7 @@ const SalesManagement = () => {
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <div className="text-muted fw-semibold fs-7">Total Sales Revenue</div>
-                  <h3 className="fw-extrabold text-success mb-0">${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                  <h3 className="fw-extrabold text-success mb-0">₹{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                 </div>
                 <div className="fs-1 text-success">💵</div>
               </div>
@@ -348,14 +348,14 @@ const SalesManagement = () => {
                             </span>
                           </td>
                           <td className="fw-bold fs-6">{s.quantity}</td>
-                          <td>${Number(s.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td>₹{Number(s.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                           <td className="fw-extrabold text-success">
-                            ${Number(s.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            ₹{Number(s.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </td>
                           <td>
                             {hasBalanceDue ? (
                               <span className="badge bg-warning-subtle text-dark border border-warning px-2 py-1">
-                                ⚠️ Due: ${Number(s.paymentBalance).toFixed(2)}
+                                ⚠️ Due: ₹{Number(s.paymentBalance).toFixed(2)}
                               </span>
                             ) : (
                               <span className="badge bg-success-subtle text-success border border-success px-2 py-1">
@@ -459,7 +459,7 @@ const SalesManagement = () => {
                           <option value="">Any Available Flock ({totalAvailableChickens} total available)</option>
                           {chickens.map((c) => (
                             <option key={c._id} value={c._id}>
-                              {c.breed} — {c.quantity} available (${c.price}/unit)
+                              {c.breed} — {c.quantity} available (₹{c.price}/unit)
                             </option>
                           ))}
                         </select>
@@ -480,7 +480,7 @@ const SalesManagement = () => {
                             const bal = eg.balanceEggs !== undefined ? eg.balanceEggs : Math.max(0, (eg.goodEggs || 0) - (eg.soldEggs || 0));
                             return (
                               <option key={eg._id} value={eg._id} disabled={bal <= 0}>
-                                {eg.breed} ({new Date(eg.productionDate).toLocaleDateString()}) — {bal} eggs in balance (${eg.pricePerEgg}/egg)
+                                {eg.breed} ({new Date(eg.productionDate).toLocaleDateString()}) — {bal} eggs in balance (₹{eg.pricePerEgg}/egg)
                               </option>
                             );
                           })}
@@ -562,7 +562,7 @@ const SalesManagement = () => {
                       )}
                     </div>
                     <div className="col-12 col-md-4">
-                      <label className="form-label fw-bold">Selling Price per Unit ($)</label>
+                      <label className="form-label fw-bold">Selling Price per Unit (₹)</label>
                       <input
                         type="number"
                         className="form-control"
@@ -591,9 +591,9 @@ const SalesManagement = () => {
                   {/* Customer Payment & Balance Section */}
                   <div className="row g-3 mb-3">
                     <div className="col-12 col-md-6">
-                      <label className="form-label fw-bold">Amount Paid by Customer ($)</label>
+                      <label className="form-label fw-bold">Amount Paid by Customer (₹)</label>
                       <div className="input-group">
-                        <span className="input-group-text">$</span>
+                        <span className="input-group-text">₹</span>
                         <input
                           type="number"
                           className="form-control"
@@ -619,15 +619,15 @@ const SalesManagement = () => {
                       <div className="p-2 border rounded-3 bg-light">
                         {paymentBalanceDue > 0 ? (
                           <div className="text-danger fw-bold">
-                            ⚠️ Balance Due from Customer: ${paymentBalanceDue.toFixed(2)}
+                            ⚠️ Balance Due from Customer: ₹{paymentBalanceDue.toFixed(2)}
                           </div>
                         ) : changeDue > 0 ? (
                           <div className="text-primary fw-bold">
-                            💵 Change / Balance Return: ${changeDue.toFixed(2)}
+                            💵 Change / Balance Return: ₹{changeDue.toFixed(2)}
                           </div>
                         ) : (
                           <div className="text-success fw-bold">
-                            ✅ Fully Paid (Balance: $0.00)
+                            ✅ Fully Paid (Balance: ₹0.00)
                           </div>
                         )}
                       </div>
@@ -638,7 +638,7 @@ const SalesManagement = () => {
                   <div className="card bg-light border-0 rounded-3 p-3 text-end">
                     <span className="text-muted fs-7">Calculated Invoice Amount:</span>
                     <span className="fs-3 fw-extrabold text-success">
-                      ${calculatedTotalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ₹{calculatedTotalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                     {(isChickenType || isEggType) && (
                       <span className="text-muted fs-7 mt-1">

@@ -147,7 +147,7 @@ const Dashboard = () => {
                       <span className="stat-label text-muted fw-bold">TOTAL SALES</span>
                       <span className="stat-icon">💰</span>
                     </div>
-                    <h2 className="stat-number fw-bold text-success">${summary.totalSales.toLocaleString()}</h2>
+                    <h2 className="stat-number fw-bold text-success">₹{summary.totalSales.toLocaleString()}</h2>
                     <small className="text-success fw-semibold">Total gross revenue</small>
                   </div>
                 </div>
@@ -161,7 +161,7 @@ const Dashboard = () => {
                       <span className="stat-label text-muted fw-bold">TOTAL EXPENSES</span>
                       <span className="stat-icon">💸</span>
                     </div>
-                    <h2 className="stat-number fw-bold text-danger">${summary.totalExpenses.toLocaleString()}</h2>
+                    <h2 className="stat-number fw-bold text-danger">₹{summary.totalExpenses.toLocaleString()}</h2>
                     <small className="text-danger fw-semibold">Operational expenditure</small>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ const Dashboard = () => {
                       <span className="stat-icon">📈</span>
                     </div>
                     <h2 className={`stat-number fw-extrabold ${summary.profit >= 0 ? 'text-success' : 'text-danger'}`}>
-                      ${summary.profit.toLocaleString()}
+                      ₹{summary.profit.toLocaleString()}
                     </h2>
                     <small className="fw-semibold text-dark">
                       {summary.profit >= 0 ? '✅ Profitable Operation' : '⚠️ Net Loss Detected'}
@@ -200,7 +200,7 @@ const Dashboard = () => {
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                         <XAxis dataKey="name" stroke="#555" fontWeight="bold" />
                         <YAxis stroke="#555" />
-                        <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                        <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
                         <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
                           {financialData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -240,7 +240,7 @@ const Dashboard = () => {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                          <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>

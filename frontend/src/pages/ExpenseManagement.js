@@ -123,7 +123,7 @@ const ExpenseManagement = () => {
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <div className="text-muted fw-semibold fs-7">Total Recorded Expenses</div>
-                  <h3 className="fw-extrabold text-danger mb-0">${totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                  <h3 className="fw-extrabold text-danger mb-0">₹{totalExpense.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                 </div>
                 <div className="fs-1 text-danger">🧾</div>
               </div>
@@ -194,7 +194,7 @@ const ExpenseManagement = () => {
                             </span>
                           </td>
                           <td className="fw-semibold text-dark">{ex.description}</td>
-                          <td className="fw-extrabold text-danger">${Number(ex.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td className="fw-extrabold text-danger">₹{Number(ex.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                           <td className="text-muted">
                             {new Date(ex.date).toLocaleDateString()}
                           </td>
@@ -263,7 +263,7 @@ const ExpenseManagement = () => {
                       </select>
                     </div>
                     <div className="col-6">
-                      <label className="form-label fw-bold">Amount ($)</label>
+                      <label className="form-label fw-bold">Amount (₹)</label>
                       <input
                         type="number"
                         className="form-control"

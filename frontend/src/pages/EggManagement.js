@@ -357,8 +357,8 @@ const EggManagement = () => {
                               </span>
                             )}
                           </td>
-                          <td>${egg.pricePerEgg}</td>
-                          <td className="fw-bold text-success">${egg.totalAmount.toFixed(2)}</td>
+                          <td>₹{egg.pricePerEgg}</td>
+                          <td className="fw-bold text-success">₹{egg.totalAmount.toFixed(2)}</td>
                           <td>
                             <div className="d-flex gap-2">
                               <button
@@ -471,7 +471,7 @@ const EggManagement = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Price per Egg ($)</label>
+                    <label className="form-label fw-bold">Price per Egg (₹)</label>
                     <input
                       type="number"
                       className="form-control"
@@ -493,7 +493,7 @@ const EggManagement = () => {
                     </div>
                     <div className="d-flex justify-content-between">
                       <span className="fw-bold text-dark">Computed Total Harvest Value:</span>
-                      <span className="fw-extrabold text-success fs-5">${calculatedTotalAmount.toFixed(2)}</span>
+                      <span className="fw-extrabold text-success fs-5">₹{calculatedTotalAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -584,7 +584,7 @@ const EggManagement = () => {
                       )}
                     </div>
                     <div className="col-6">
-                      <label className="form-label fw-bold">Price per Egg ($)</label>
+                      <label className="form-label fw-bold">Price per Egg (₹)</label>
                       <input
                         type="number"
                         className="form-control"
@@ -611,7 +611,7 @@ const EggManagement = () => {
                       />
                     </div>
                     <div className="col-6">
-                      <label className="form-label fw-bold">Amount Paid by Customer ($)</label>
+                      <label className="form-label fw-bold">Amount Paid by Customer (₹)</label>
                       <input
                         type="number"
                         className="form-control"
@@ -629,13 +629,13 @@ const EggManagement = () => {
                   <div className="card bg-light border-0 rounded-3 p-3 text-end">
                     <div className="d-flex justify-content-between mb-1">
                       <span className="text-muted fs-7">Total Invoice Amount:</span>
-                      <span className="fw-bold text-success fs-5">${sellTotal.toFixed(2)}</span>
+                      <span className="fw-bold text-success fs-5">₹{sellTotal.toFixed(2)}</span>
                     </div>
                     <div className="d-flex justify-content-between mb-1">
                       <span className="text-muted fs-7">Payment Status:</span>
                       <span className="fw-semibold">
                         {sellBalanceDue > 0 ? (
-                          <span className="text-danger">⚠️ Balance Due: ${sellBalanceDue.toFixed(2)}</span>
+                          <span className="text-danger">⚠️ Balance Due: ₹{sellBalanceDue.toFixed(2)}</span>
                         ) : (
                           <span className="text-success">✅ Paid in Full</span>
                         )}

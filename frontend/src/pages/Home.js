@@ -158,7 +158,7 @@ const Home = () => {
                 <div className="card-body d-flex align-items-center justify-content-between p-4">
                   <div>
                     <span className="card-subtitle text-muted fw-semibold display-block">Revenue</span>
-                    <h3 className="card-value fw-extrabold mt-1 mb-0">${summary.totalSales.toLocaleString()}</h3>
+                    <h3 className="card-value fw-extrabold mt-1 mb-0">₹{summary.totalSales.toLocaleString()}</h3>
                     <small className="text-success fw-semibold">💰 Total Sales</small>
                   </div>
                   <div className="icon-wrapper icon-sales">💰</div>
@@ -172,7 +172,7 @@ const Home = () => {
                 <div className="card-body d-flex align-items-center justify-content-between p-4">
                   <div>
                     <span className="card-subtitle text-muted fw-semibold display-block">Operational Costs</span>
-                    <h3 className="card-value fw-extrabold mt-1 mb-0">${summary.totalExpenses.toLocaleString()}</h3>
+                    <h3 className="card-value fw-extrabold mt-1 mb-0">₹{summary.totalExpenses.toLocaleString()}</h3>
                     <small className="text-danger fw-semibold">💸 Total Expenses</small>
                   </div>
                   <div className="icon-wrapper icon-expenses">💸</div>
